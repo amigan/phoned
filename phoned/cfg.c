@@ -2,6 +2,7 @@
  * FUCK....lex overwrote this :-(
  * (C)2005, Dan Ponte...again.
  */
+/* $Amigan: phoned/phoned/cfg.c,v 1.2 2005/06/01 00:43:07 dcp1990 Exp $ */
 #include <stdio.h>
 #include <string.h>
 #include <phoned.h>

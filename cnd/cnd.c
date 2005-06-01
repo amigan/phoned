@@ -5,6 +5,7 @@
  * Excerpted from the original cidserv distribution. Modified to work
  * with phoned.
  */
+/* $Amigan: phoned/cnd/cnd.c,v 1.2 2005/06/01 00:43:07 dcp1990 Exp $ */
 #include <fcntl.h>
 #include <ctype.h>
 #include <unistd.h>
@@ -29,7 +30,7 @@
 #define ADDRS "/usr/local/etc/cidserv.conf"
 int nhosts = 0;
 char hosts[10][18];
-static const char rcsid[] = "$Amigan: phoned/cnd/cnd.c,v 1.1 2005/06/01 00:37:22 dcp1990 Exp $";
+static const char rcsid[] = "$Amigan: phoned/cnd/cnd.c,v 1.2 2005/06/01 00:43:07 dcp1990 Exp $";
 void send_dgram(char* address, char* datar);
 void load_addrs(const char* fl);
 int parse_cid(char* tty, char* phone, char* name, int dist_r, char* called);

@@ -3,6 +3,7 @@
  * (C)2005, Dan Ponte
  * BSDL w/ advert.
  */
+/* $Amigan: phoned/include/phoned.h,v 1.2 2005/06/01 00:43:07 dcp1990 Exp $ */
 #define VERSION "0.1"
 #define LOGFILE "/var/log/phoned.log"
 #define SOCKETFILE "/tmp/phoned.sock"

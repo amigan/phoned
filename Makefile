@@ -1,4 +1,5 @@
 # main makefile...
+# $Amigan: phoned/Makefile,v 1.2 2005/06/01 00:43:07 dcp1990 Exp $
 # Oh My Fucking God, this is such a big, unportable mess. Oh well.
 # BSD Make > *
 APPS=cnd phoned

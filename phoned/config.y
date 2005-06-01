@@ -40,7 +40,7 @@ command:
 main:
 	MAIN params
 	{
-		lprintf(info, "parser: end main\n");
+		lprintf(debug, "parser: end main\n");
 	}
 	;
 params:
@@ -56,7 +56,7 @@ directive:
 notify:
 	NOTIFY iplist
 	{
-		lprintf(info, "parser: end notify\n");
+		lprintf(debug, "parser: end notify\n");
 	}
 	;
 iplist:
@@ -75,7 +75,7 @@ ipadr:
 modemdev:
 	MODDEV devpath
 	{
-		lprintf(info, "parser: end modemdev\n");
+		lprintf(debug, "parser: end modemdev\n");
 	}
 	;
 devpath:

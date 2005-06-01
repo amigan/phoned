@@ -57,7 +57,7 @@ void handclient(sk)
 	lprintf(debug, "Client said %s.", buffer);
 }
 
-void network(void)
+void network(void) /* name is misleading because we also do modem IO here */
 {
 	int 		s, us, sn;
 	fd_set		fds;

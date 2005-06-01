@@ -13,6 +13,7 @@ int chrcnt = 0;
 int lincnt = 1;
 int yylex(void);
 extern char* yytext;
+extern struct conf cf;
 void yyerror(str)
 	char* str;
 {
@@ -82,6 +83,7 @@ devpath:
 	QUOTE PATH QUOTE
 	{
 		lprintf(debug, "Modem dev == %s\n", $2);
+		cf.modemdev = $2;
 	}
 	;
 %%

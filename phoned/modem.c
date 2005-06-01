@@ -57,7 +57,7 @@ int init_modem(char* dev)
 {
 	int lres = 0;
 	modemfd = open(dev, O_RDWR);
-	if(!modemfd) {
+	if(modemfd == -1) {
 		lprintf(error, "Error opening modem %s: %s\n", dev, strerror(errno));
 		return -2;
 	}

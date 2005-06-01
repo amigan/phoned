@@ -39,5 +39,8 @@ void initialize(void)
 	open_logs();
 	install_handlers();
 	read_config();
+	if(init_modem(cf.modemdev) != 1) {
+		lprintf(warn, "warning: modem didn't initialise properly; see previous messages\n");
+	}
 }
 

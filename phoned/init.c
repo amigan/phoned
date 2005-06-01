@@ -23,10 +23,13 @@ void shutd(void)
 
 void open_logs(void)
 {
-	logf = fopen(difflog ? cf.logfile : LOGFILE, "a");
-	if(!logf) {
-		perror("logf open");
-		exit(-1);
+	if(strcmp(difflog ? cf.logfile : LOGFILE, "-") == 0) logf = stderr;
+	else {
+		logf = fopen(difflog ? cf.logfile : LOGFILE, "a");
+		if(!logf) {
+			perror("logf open");
+			exit(-1);
+		}
 	}
 	lprintf(info, "phoned v" VERSION " starting..\n");
 }

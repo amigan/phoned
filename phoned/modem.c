@@ -28,3 +28,49 @@
  * SUCH DAMAGE.
  */
 /* system includes */
+#include <fcntl.h>
+#include <ctype.h>
+#include <unistd.h>
+#include <signal.h>
+#include <termios.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <libutil.h>
+#include <sys/types.h>
+#include <sys/select.h>
+#include <sys/ioctl.h>
+#include <sys/types.h>
+#include <errno.h>
+#include <phoned.h>
+#define INITSTRING "ATZ\r\nAT E0 #CID=2 V0\r\n"
+/* globals */
+FILE* modem;
+int modemfd;
+void stmod(const char* str)
+{
+	fputs(str, modem);
+	fflush(modem);
+}
+int init_modem(char* dev)
+{
+	int lres = 0;
+	modemfd = open(dev, O_RDWR);
+	if(!modemfd) {
+		lprintf(error, "Error opening modem %s: %s\n", dev, strerror(errno));
+		return -2;
+	}
+	lres = uu_lock((dev+(sizeof("/dev/")-1))); 
+	if(lres != 0) {
+		lprintf(error, "%s\n", uu_lockerr(lres));
+		return -1;
+	}
+	modem = fdopen(modemfd, "w+");
+	if(!modem) {
+		lprintf(error, "Error fdopening modemfd %d: %s\n", modemfd, strerror(errno));
+		return -3;
+	}
+	stmod(INITSTRING);
+	return 1;
+}

@@ -45,6 +45,9 @@
 
 #include <phoned.h>
 
+extern int modemfd;
+extern FILE* modem;
+
 void handclient(sk)
 	int	sk;
 {

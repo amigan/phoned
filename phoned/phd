@@ -1,0 +1,10 @@
+24Mar 17:05:57: phoned v0.1 starting..
+24Mar 17:05:57: Encountered ipaddress 10.10.10.13
+24Mar 17:05:57: Encountered ipaddress 10.10.10.1
+24Mar 17:05:57: parser: end notify
+24Mar 17:06:05: phoned v0.1 starting..
+24Mar 17:06:05: Encountered ipaddress 10.10.10.13
+24Mar 17:06:05: Encountered ipaddress 10.10.10.1
+24Mar 17:06:05: parser: end notify
+24Mar 17:06:51: Received signal 2, cleaning up...
+24Mar 17:06:51: phoned shutting down...

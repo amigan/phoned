@@ -1,0 +1,51 @@
+**************************************************************************
+**		phoned installation guide -- it's good			**
+**			(C)2005, Dan Ponte				**
+**************************************************************************
+1.0 Introduction
+phoned is [supposed to be] a powerful phone answering system, much like
+VOCP. However, it is more-client-server based.
+Its power stems from the use of vgetty, part of the mgetty+sendfax
+distribution. It is available at:
+	http://alpha.greenie.net/mgetty/
+mgetty+sendfax is also available under FreeBSD ports as comms/mgetty+sendfax/.
+I will not cover the installation and configuration of mgetty/vgetty here.
+There are many good docs on the process.
+
+The phoned distribution consists of the following:
+*phoned - the main daemon responsible for logging stuff and talking to
+ clients
+*phonecall - a Perl script called by vgetty when it answers the phone,
+ responsible for talking to phoned and telling vgetty what to do (play sound
+ files, interpret menu options, etc)
+*xfone - a Tcl/Tk application for checking messages and administering
+ mailboxes
+*cnd - called by vgetty when the phone rings to tell phoned to log the call,
+ alert network users and either reject or accept the call based on the
+ caller. (based on a tiny bit of code from my old cidserv application, it is
+ compatible with its clients.)
+
+2.0 Requirements
+In order to use the base phoned and phonecall, you must have at least the
+following:
+*A Unix system capable of running perl, vgetty, and using sockets 
+	(tested on FreeBSD) (the phoned suite will NOT run on windows. Get a
+				better OS. It might run on OSX.)
+*Perl (tested on 5.8.6)
+*The Modem::Vgetty Perl module, available from CPAN
+*A properly installed and configured vgetty
+*A voice modem supported by vgetty. Tested with the Diamond SupraExpress 56i
+ Sp (Rockwell chipset/driver)
+*Telephone service
+*A telephone, mic, or other recording device to record the greeting messages
+*A friend who has a telephone to annoy so he can test the system ;-)
+
+Optional:
+*Caller ID service from your phone company in order to use cnd
+*The Festival Speech Synthesis package, available under FreeBSD ports as
+ audio/festival/, in order to use the speech capabilities (highly
+ recommended.)
+
+In order to run xfone, you need:
+*Tcl 8.4
+*Tk 8.4

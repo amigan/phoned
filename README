@@ -1,0 +1,28 @@
++=======================================+
+|		phoned			|
+|	(C)2005, Dan Ponte		|
++=======================================+
+This is the phoned distribution, version 0.1.
+phoned is distributed under the license outlined in COPYRIGHT. Please read
+it before use!
+
+This is now a hybrid of the older cidserv distribution. I might go to CVS
+some day.
+
+To build, simply type 'make'. phoned was written for BSD make (just "make"
+on regular BSD systems, "pmake" on many linux machines.) For further
+installation instructions, please see doc/install_guide.txt.
+
+You will find the following directories in this source archive:
+
+cnd/ - Caller ID program
+doc/ - misc. documentation
+examples/ - example scripts
+include/ - global include files
+lib/ - API libraries
+phonectl/ - command line client to phoned
+phoned/ - main phone daemon written in C
+xfone/ - Tcl/Tk interface to phoned
+
+dcp1990@neptune.atopia.net - http://www.theamigan.net/phoned/index.html
+vim:tw=76

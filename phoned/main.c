@@ -16,7 +16,7 @@ short	difflog = 0;
 void usage(argv)
 	const char* argv;
 {
-	fprintf(stderr, "%s: usage: %s [-h] [-c config] [-l log]\n", argv, argv);
+	fprintf(stderr, "%s: usage: %s [-hd] [-c config] [-l log]\n", argv, argv);
 }
 
 int main(argc, argv)
@@ -25,7 +25,7 @@ int main(argc, argv)
 {
 	int c;
 	cf.cfile = CONFIGFILE;
-#define OPTSTRING "hc:l:"
+#define OPTSTRING "dhc:l:"
 	while((c = getopt(argc, argv, OPTSTRING)) != -1)
 		switch(c) {
 			case 'c':
@@ -37,6 +37,9 @@ int main(argc, argv)
 			case 'l':
 				cf.logfile = strdup(optarg);
 				difflog = 1;
+				break;
+			case 'd':
+				daemon(0, 0);
 				break;
 			default:
 				usage(strdup(*argv));

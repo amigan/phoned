@@ -39,7 +39,7 @@ int main(argc, argv)
 				difflog = 1;
 				break;
 			case 'd':
-				daemon(0, 0);
+				daemon(1, 0);
 				break;
 			default:
 				usage(strdup(*argv));

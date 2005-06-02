@@ -42,19 +42,24 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/un.h>
+#include <errno.h>
+#include <pthread.h>
 
 #include <phoned.h>
 
 extern int modemfd;
 extern FILE* modem;
 
-void handclient(sk)
-	int	sk;
+void *handclient(k)
+	void*	k;
 {
+	int sk = (int)k;
 	char	buffer[1024];
 	int	rlen;
 	rlen = recv(sk, buffer, sizeof(buffer), 0);
 	lprintf(debug, "Client said %s.", buffer);
+	close(sk);
+	return 0;
 }
 
 void network(void) /* name is misleading because we also do modem IO here */
@@ -62,6 +67,7 @@ void network(void) /* name is misleading because we also do modem IO here */
 	int 		s, /* us,*/ sn;
 	fd_set		fds;
 	int		sin_size, ilen;
+	pthread_t	thr;
 	char		cbuf[1];
 	cbuf[0] = '\0'; cbuf[1] = '\0';
 	struct sockaddr_un it;
@@ -98,14 +104,16 @@ void network(void) /* name is misleading because we also do modem IO here */
 			{
 				if(FD_ISSET(s, &fds) != 0) {
 					ilen = sizeof(it);
-					if((sn = accept(s,
-						(struct sockaddr *)&it, &ilen))
+					if((sn = accept(s, (struct sockaddr *)&it, &ilen))
 							== -1) {
-						perror("s accept");
+						lprintf(error, "accept: %s\n",
+								strerror(errno));
 						exit(-3);
 					}
-					handclient(sn);
-					close(sn);
+					pthread_create(&thr, NULL, handclient, (void*)sn);
+					lprintf(info, "Incoming connection; child pid %d\n"
+							,ilen);
+						
 				}
 				if(FD_ISSET(modemfd, &fds) != 0)
 				{

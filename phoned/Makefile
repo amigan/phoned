@@ -1,10 +1,10 @@
 # cnd Makefile
 # (C)2005, Dan Ponte
-# $Amigan: phoned/phoned/Makefile,v 1.7 2005/06/02 02:45:35 dcp1990 Exp $
+# $Amigan: phoned/phoned/Makefile,v 1.8 2005/06/02 20:49:26 dcp1990 Exp $
 include ../global.mk
 # basic stuff. we append for a reason.
 CPPFLAGS=-I../include -DDEBUG -DYY_NO_UNPUT
-CFLAGS+=-g -Wall -W -ansi ${CPPFLAGS}
+CFLAGS+=-g -Wall -W -ansi ${CPPFLAGS} -pthread
 LDFLAGS=-lutil
 # keep these up to date.
 MAINBIN=phoned

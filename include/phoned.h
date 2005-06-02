@@ -3,7 +3,7 @@
  * (C)2005, Dan Ponte
  * BSDL w/ advert.
  */
-/* $Amigan: phoned/include/phoned.h,v 1.2 2005/06/01 00:43:07 dcp1990 Exp $ */
+/* $Amigan: phoned/include/phoned.h,v 1.3 2005/06/02 03:02:41 dcp1990 Exp $ */
 #define VERSION "0.1"
 #define LOGFILE "/var/log/phoned.log"
 #define SOCKETFILE "/tmp/phoned.sock"
@@ -13,6 +13,7 @@ struct conf {
 	char* cfile;
 	char* logfile;
 	int loglevels;
+	char* modemdev;
 };
 #define LL_DEBUG	0x1
 #define	LL_GARBAGE	0x2
@@ -32,7 +33,23 @@ enum ltype {
 	critical,
 	fatal
 };
-
+typedef struct c_t {
+	char* name;
+	char* number;
+	short hour;
+	short minute;
+	short month;
+	short day;
+} cid_t;
+#ifdef HAVE_INET_INCS
+typedef struct adll_t {
+	in_addr_t addr;
+	struct adll_t* next;
+} addrsll_t;
+addrsll_t* allocaddr(void);
+addrsll_t* getlast(addrsll_t* hd);
+void freeaddrl(addrsll_t* hd);
+#endif
 /* function prottypes */
 void initialize(void);
 void open_log(void);
@@ -43,3 +60,13 @@ int lprintf(enum ltype logtype, const char* fmt, ...);
 void handsig(int sig);
 void install_handlers(void);
 int parse(FILE** fp);
+cid_t* parse_cid(char* cidstring);
+int free_cid(cid_t* ctf);
+void stmod(const char* str);
+int init_modem(char* dev);
+int close_modem(char* dev);
+int cid_notify(cid_t* c);
+void flush_lists(void);
+void addtoaddrs(const char* par);
+void modem_hread(char* cbuf);
+void cid_log(cid_t* c);

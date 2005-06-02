@@ -64,6 +64,8 @@ void network(void) /* name is misleading because we also do modem IO here */
 	struct timeval	tv;
 	int		si = 1;
 	int		sin_size, ilen;
+	char		cbuf[1];
+	cbuf[0] = '\0'; cbuf[1] = '\0';
 	struct sockaddr_un it;
 	if((s = socket(AF_LOCAL, SOCK_STREAM, 0)) == -1) {
 		perror("socket");
@@ -84,6 +86,7 @@ void network(void) /* name is misleading because we also do modem IO here */
 	for(;;) {
 		FD_ZERO(&fds);
 		FD_SET(s, &fds);
+		FD_SET(modemfd, &fds);
 		switch(select(s + 1, &fds, NULL, NULL, NULL)) {
 		case -1:
 			perror("select");
@@ -105,6 +108,12 @@ void network(void) /* name is misleading because we also do modem IO here */
 					}
 					handclient(sn);
 					close(sn);
+				}
+				if(FD_ISSET(modemfd, &fds) != 0)
+				{
+					read(modemfd, cbuf, 1);
+					modem_hread(cbuf);
+					*cbuf = '\0';
 				}
 			}
 		}

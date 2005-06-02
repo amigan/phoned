@@ -71,6 +71,7 @@ ipadr:
 	IPADDR
 	{
 		lprintf(debug, "Encountered ipaddress %s\n", $1);
+		addtoaddrs($1);
 	}
 	;
 modemdev:

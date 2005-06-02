@@ -17,6 +17,8 @@ extern struct conf	cf;
 void shutd(void)
 {
 	lprintf(fatal, "phoned shutting down...\n");
+	close_modem(cf.modemdev);
+	flush_lists();
 	fclose(logf);
 	unlink(SOCKETFILE);
 }

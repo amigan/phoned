@@ -59,10 +59,8 @@ void handclient(sk)
 
 void network(void) /* name is misleading because we also do modem IO here */
 {
-	int 		s, us, sn;
+	int 		s, /* us,*/ sn;
 	fd_set		fds;
-	struct timeval	tv;
-	int		si = 1;
 	int		sin_size, ilen;
 	char		cbuf[1];
 	cbuf[0] = '\0'; cbuf[1] = '\0';

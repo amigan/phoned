@@ -48,7 +48,7 @@
 /* globals */
 FILE* modem;
 int modemfd;
-int cou = 0;
+unsigned int cou = 0;
 char buffer[512];
 short doing_cid = 0;
 void stmod(const char* str)
@@ -101,7 +101,8 @@ int init_modem(char* dev)
 }
 int modem_evalrc(char* result)
 {
-	int rescode, i;
+	int rescode;
+	unsigned int i;
 	for(i = 0; i <= strlen(result); i++) {
 		if(result[i] == '\r' || result[i] == '\n') result[i] = '\0';
 	}

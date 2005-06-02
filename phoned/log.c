@@ -138,6 +138,6 @@ int lprintf(enum ltype logtype, const char* fmt, ...)
 }
 void cid_log(cid_t* c)
 {
-	lprintf(info, "Call! %02d%02d:%02d%02d:%s:%s", c->month, c->day, c->hour, c->minute,
+	lprintf(info, "Call! %02d%02d:%02d%02d:%s:%s\n", c->month, c->day, c->hour, c->minute,
 			c->name, c->number);
 }

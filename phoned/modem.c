@@ -1,7 +1,8 @@
 /*
  * Copyright (c) 2005, Dan Ponte
  *
- * modem.c - modem code
+ * modem.c - modem code for supra (Rockwell), might work on others...
+ * this will be pluggable in the future
  * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -133,6 +134,7 @@ void modem_hread(char* cbuf)
 		if(doing_cid) {
 			cid_t *rc;
 			rc = parse_cid(buffer);
+			cid_log(rc);
 			cid_notify(rc);
 			memset(buffer, 0, sizeof(buffer));
 			doing_cid = 0;

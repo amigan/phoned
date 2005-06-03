@@ -111,7 +111,7 @@ void network(void) /* name is misleading because we also do modem IO here */
 						exit(-3);
 					}
 					pthread_create(&thr, NULL, handclient, (void*)sn);
-					lprintf(info, "Incoming connection; child pid %d\n"
+					lprintf(info, "Incoming connection\n"
 							,ilen);
 						
 				}

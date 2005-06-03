@@ -27,14 +27,14 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phonectl/phonectl.c,v 1.2 2005/06/01 00:43:07 dcp1990 Exp $ */
+/* $Amigan: phoned/phonectl/phonectl.c,v 1.3 2005/06/03 00:22:11 dcp1990 Exp $ */
 /* system includes */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <optarg.h>
 #include <netinet/in.h>
+#include <getopt.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <signal.h>
@@ -42,10 +42,26 @@
 #include <arpa/inet.h>
 #include <sys/un.h>
 /* us */
-#include <phonectl.h>
-
+#define DEFSOCK "/tmp/phoned.sock"
 int main(argc, argv)
 	int argc;
 	char* argv[];
 {
-
+	int s;
+	char buff[1024];
+	struct sockaddr_un it;
+	if(argc < 1) exit(-1);
+	s = socket(AF_LOCAL, SOCK_STREAM, 0);
+	strcpy(it.sun_path, DEFSOCK);
+	it.sun_family = AF_LOCAL;
+	if(connect(s, (struct sockaddr *)&it, 1 + strlen(it.sun_path) + sizeof(it.sun_family))
+			== -1) {
+		perror("conn");
+		exit(-1);
+	}
+	write(s, argv[1], strlen(argv[1]) + 1);
+	read(s, buff, sizeof buff);
+	printf("%s\n", buff);
+	close(s);
+	return 0;
+}

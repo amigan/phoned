@@ -58,6 +58,17 @@ void *handclient(k)
 	int	rlen;
 	rlen = recv(sk, buffer, sizeof(buffer), 0);
 	lprintf(debug, "Client said %s.", buffer);
+	if(strcmp(buffer, "tnotify") == 0) {
+		cid_t c;
+		c.number = "7823020300";
+		c.name = "BUSH,GEORGE W.";
+		c.day = 2;
+		c.hour = 3;
+		c.month = 4;
+		c.minute = 20;
+		cid_notify(&c);
+		cid_log(&c);
+	}
 	close(sk);
 	return 0;
 }

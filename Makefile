@@ -1,8 +1,8 @@
 # main makefile...
-# $Amigan: phoned/Makefile,v 1.2 2005/06/01 00:43:07 dcp1990 Exp $
+# $Amigan: phoned/Makefile,v 1.3 2005/06/04 03:01:31 dcp1990 Exp $
 # Oh My Fucking God, this is such a big, unportable mess. Oh well.
 # BSD Make > *
-APPS=cnd phoned
+APPS=phonectl phoned
 APPSUF=${APPS:S/$/_app/}
 APPSCLEAN=${APPS:S/$/_cl/}
 all: ${APPSUF}

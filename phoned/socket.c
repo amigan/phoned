@@ -68,6 +68,12 @@ void *handclient(k)
 		c.minute = 20;
 		cid_notify(&c);
 		cid_log(&c);
+	} else if(strcmp(buffer, "tparse") == 0) {
+		cid_t* rc;
+		rc = parse_cid("802701083132323130383234070F5354414E444953482048454154494E020A343031333937333337325C\n");
+		lprintf(info, "nam=%s;month=%d\n", rc->name, rc->month);
+		cid_notify(rc);
+		cid_log(rc);
 	}
 	close(sk);
 	return 0;

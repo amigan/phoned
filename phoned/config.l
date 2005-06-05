@@ -9,12 +9,20 @@
 #endif
 #include <phoned.h>
 extern int	chrcnt, lincnt;
+extern struct conf cf; /* ewwwww */
 %}
 %%
 .			++chrcnt; REJECT;
 main			return MAIN;
+loglevel		cf.loglevels = LL_CRITICAL|LL_FATAL; return LLEVEL;
+all			yylval.number = LL_ALL; return LNUML;
+debug			yylval.number = LL_DEBUG; return LNUML;
+info			yylval.number = LL_INFO; return LNUML;
+garbage			yylval.number = LL_GARBAGE; return LNUML;
+warn			yylval.number = LL_WARN; return LNUML;
 notify			return NOTIFY;
 modemdev		return MODDEV;
+\|			return OR;
 \"			return QUOTE;
 \{			return OBRACE;
 \}			return CBRACE;

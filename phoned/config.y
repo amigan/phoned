@@ -26,12 +26,13 @@ int yywrap(void)
 	return 1;
 }
 %}
-%token NOTIFY OBRACE CBRACE SCOLON QUOTE MODDEV MAIN
+%token NOTIFY OBRACE CBRACE SCOLON QUOTE MODDEV MAIN LLEVEL OR
+%token <number> LNUML
 %token <string> IPADDR PATH
 %%
 commands:
 	|
-	command SCOLON commands
+	commands command SCOLON
 	;
 command:
 	notify
@@ -40,9 +41,6 @@ command:
 	;
 main:
 	MAIN params
-	{
-		lprintf(debug, "parser: end main\n");
-	}
 	;
 params:
 	OBRACE directives CBRACE
@@ -53,12 +51,11 @@ directives:
 	;
 directive:
 	modemdev
+	|
+	loglevel
 	;
 notify:
 	NOTIFY iplist
-	{
-		lprintf(debug, "parser: end notify\n");
-	}
 	;
 iplist:
 	OBRACE ipaddrs CBRACE
@@ -76,15 +73,31 @@ ipadr:
 	;
 modemdev:
 	MODDEV devpath
-	{
-		lprintf(debug, "parser: end modemdev\n");
-	}
 	;
 devpath:
 	QUOTE PATH QUOTE
 	{
 		lprintf(debug, "Modem dev == %s\n", $2);
 		cf.modemdev = $2;
+	}
+	;
+/* loglevels */
+loglevel:
+	LLEVEL llvls
+	;
+llvls:
+	|
+	llvl llvls
+	;
+llvl:
+	LNUML OR
+	{
+		cf.loglevels |= $1;
+	}
+	|
+	LNUML
+	{
+		cf.loglevels |= $1;
 	}
 	;
 %%

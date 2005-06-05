@@ -131,7 +131,7 @@ int lprintf(enum ltype logtype, const char* fmt, ...)
 			}
 		}
 	}
-	if(fmt[strlen(fmt)] != '\n')
+	if(fmt[strlen(fmt)-1] != '\n')
 		fputc('\n', logf);
 	fflush(logf);
 	va_end(ap);

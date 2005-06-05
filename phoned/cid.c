@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/cid.c,v 1.1 2005/06/01 01:11:34 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/cid.c,v 1.2 2005/06/05 17:41:31 dcp1990 Exp $ */
 /* system includes */
 #include <stdlib.h>
 #include <unistd.h>
@@ -148,11 +148,21 @@ cid_t* parse_cid(char* cidstring)
 	       strcpy(phone, "PRIVATE");
 	if(phone[0] == 'O')
 		strcpy(phone, "UNAVAILABLE");
+#if 0
 	c->name = malloc((sizeof(char) * strlen(name)) + 1);
 	strncpy(c->name, name, strlen(name) + 1);
 	c->number = malloc((sizeof(char) * strlen(phone)) + 1);
 	strncpy(c->number, phone, strlen(phone) + 1);
 	sscanf(date, "%d/%d", (int*)&c->month, (int*)&c->day);
+#endif
+	c->name = strdup(name);
+	c->number = strdup(phone);
 	sscanf(cidtime, "%d:%d", (int*)&c->hour, (int*)&c->minute);
+	lprintf(info, "d=%s\n", date);
+	date[2] = 0x0;
+	c->month = atoi(date);
+	c->day = atoi(date + 3);
+	date[2] = '/';
+	lprintf(info, "d=%s;m=%d\n", date, c->month);
 	return c;
 }

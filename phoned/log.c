@@ -63,7 +63,7 @@ int lprintf(enum ltype logtype, const char* fmt, ...)
 	char tmt[128];
 	now = time(NULL);
 	l = cf.loglevels;
-	if(!check_loglevel(logtype, l))
+	if(check_loglevel(logtype, l) != 1)
 		return -1;
 	strftime(tmt, 128, "%d%b %H:%M:%S: ", localtime(&now));
 	fmtp = fmt;

@@ -8,6 +8,7 @@
 #include <string.h>
 #include <getopt.h>
 #include <unistd.h>
+#include <pthread.h>
 
 #include <phoned.h>
 extern struct conf cf;
@@ -49,5 +50,6 @@ int main(argc, argv)
 	initialize();
 	network();
 	shutd();
+	pthread_exit(NULL);
 	return 0;
 }

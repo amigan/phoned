@@ -76,6 +76,7 @@ void *handclient(k)
 		cid_log(rc);
 	}
 	close(sk);
+	pthread_exit(NULL);
 	return 0;
 }
 

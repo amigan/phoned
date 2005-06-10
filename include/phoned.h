@@ -3,7 +3,7 @@
  * (C)2005, Dan Ponte
  * BSDL w/ advert.
  */
-/* $Amigan: phoned/include/phoned.h,v 1.3 2005/06/02 03:02:41 dcp1990 Exp $ */
+/* $Amigan: phoned/include/phoned.h,v 1.4 2005/06/10 00:21:23 dcp1990 Exp $ */
 #define VERSION "0.1"
 #define LOGFILE "/var/log/phoned.log"
 #define SOCKETFILE "/tmp/phoned.sock"
@@ -41,6 +41,39 @@ typedef struct c_t {
 	short month;
 	short day;
 } cid_t;
+/* cond_t flags:
+ * 1 | 1 | 1
+ * ^   ^   ^-------stop processing here? (0x1)
+ * |   |---- check name? (0x2)
+ * |-- check number? (0x4)
+ */
+#define CTFLG_STOPPROC	0x1
+#define CTFLG_CHECKNAME	0x2
+#define CTFLG_CHECKNUMB	0x4
+/* action format:
+ * 1 | 1 | 1 | 1 | 1 | 1
+ * ^   ^   ^   ^   ^   ^-- ignore (0x1)
+ * |   |   |   |   |-- hang up (0x2)
+ * |   |   |   |-- remote notify (0x4)
+ * |   |   |-- answer (not implemented) (0x10)
+ * |   |-- play message (not implemented) (0x20)
+ * |--- record message (not implemented) (0x40)
+ */
+#define CTACT_IGN	0x1
+#define CTACT_HUP	0x2
+#define CTACT_RNOT	0x4
+#define CTACT_ANS	0x10
+#define CTACT_PLAY	0x20
+#define CTACT_REC	0x40
+typedef struct cnd_t {
+	char* name;
+	char* number;
+	int action;
+	struct af actflags;
+	int flags;
+	struct cnd_t* last;
+	struct cnd_t* next;
+} cond_t;
 #ifdef HAVE_INET_INCS
 typedef struct adll_t {
 	in_addr_t addr;

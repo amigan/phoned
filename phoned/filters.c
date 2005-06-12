@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/filters.c,v 1.2 2005/06/12 15:22:56 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/filters.c,v 1.3 2005/06/12 16:30:57 dcp1990 Exp $ */
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -39,7 +39,8 @@ cond_t* topcond = 0x0;
 pthread_mutex_t condmx = PTHREAD_MUTEX_INITIALIZER;
 
 /* BROKEN! Do not use! */
-cond_t* add_condition(nameregex, numregex, action)
+cond_t* add_condition(filtname, nameregex, numregex, action)
+	char* filtname;
 	char* nameregex;
 	char* numregex;
 	int action;
@@ -56,12 +57,25 @@ cond_t* add_condition(nameregex, numregex, action)
 		c->next = nc;
 	}
 	pthread_mutex_unlock(&condmx); /* done */
-	nc->name = strdup(nameregex);
-	nc->number = strdup(numregex);
-	nc->namerx.prex = pcre_compile(nc->name, 0x0, &nc->namerx.error,
-			&nc->namerx.erroroffset, NULL);
-	nc->numbrx.prex = pcre_compile(nc->number, 0x0, &nc->numbrx.error,
-			&nc->numbrx.erroroffset, NULL);
+	nc->name = strdup(filtname);
+	if(nameregex != 0x0) {
+		nc->name = strdup(nameregex);
+		nc->namerx.prex = pcre_compile(nc->name, 0x0, &nc->namerx.error,
+				&nc->namerx.erroroffset, NULL);
+	} else {
+		nc->name = NULL;
+		nc->namerx.prex = 0x0;
+	}
+	if(numregex != 0x0) {
+		nc->number = strdup(numregex);
+		nc->numbrx.prex = pcre_compile(nc->number, 0x0, &nc->numbrx.error,
+				&nc->numbrx.erroroffset, NULL);
+	} else {
+		nc->number = NULL;
+		nc->numbrx.prex = 0x0;
+	}
 	nc->action = action;
+	lprintf(info, "Added filter %s, namerx = %s, numrx = %s, action = 0x%x\n",
+			filtname, nameregex, numregex, action);
 	return nc;
 }

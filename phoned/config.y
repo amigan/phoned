@@ -12,6 +12,8 @@
 int chrcnt = 0;
 int lincnt = 1;
 int yylex(void);
+char *numrx = 0x0, *namrx = 0x0;
+int factn = 0x0;
 extern char* yytext;
 extern struct conf cf;
 void yyerror(str)
@@ -27,14 +29,18 @@ int yywrap(void)
 }
 %}
 %token NOTIFY OBRACE CBRACE SCOLON QUOTE MODDEV MAIN LLEVEL OR
-%token <number> LNUML
-%token <string> IPADDR PATH
+%token FILTERS ACTION NAME PHNUM FILTER
+ /* HANGUP IGNOREIT PLAY RECORD */
+%token <number> LNUML ACTN
+%token <string> IPADDR PATH REGEX FNAME
 %%
 commands:
 	|
 	commands command SCOLON
 	;
 command:
+	filters
+	|
 	notify
 	|
 	main
@@ -79,6 +85,68 @@ devpath:
 	{
 		lprintf(debug, "Modem dev == %s\n", $2);
 		cf.modemdev = $2;
+	}
+	;
+/* filters */
+filters:
+	FILTERS filterlist
+	;
+filterlist:
+	OBRACE filtbds CBRACE
+	;
+filtbds:
+	|
+	filtbds filtbd SCOLON
+	;
+filtbd:
+	FILTER FNAME OBRACE filtersts CBRACE
+	{
+		add_condition($2, namrx, numrx, factn);
+		free($2);
+		if(namrx != 0x0) free(namrx);
+		if(numrx != 0x0) free(numrx);
+		factn = 0x0;
+	}
+	;
+filtersts:
+	|
+	filtersts filterst SCOLON
+	;
+filterst:
+	fname
+	|
+	fnumb
+	|
+	faction
+	;
+fname:
+	NAME REGEX
+	{
+		namrx = $2;
+	}
+	;
+fnumb:
+	PHNUM REGEX
+	{
+		numrx = $2;
+	}
+	;
+faction:
+	ACTION facts
+	;
+facts:
+	|
+	fact facts
+	;
+fact:
+	ACTN OR
+	{
+		factn |= $1;
+	}
+	|
+	ACTN
+	{
+		factn |= $1;
 	}
 	;
 /* loglevels */

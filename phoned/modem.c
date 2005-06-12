@@ -44,6 +44,7 @@
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <errno.h>
+#include <pthread.h>
 #include <phoned.h>
 #define INITSTRING "ATZ\r\nAT E0 #CID=2 V0\r\n"
 /* globals */
@@ -52,13 +53,18 @@ int modemfd;
 unsigned int cou = 0;
 char buffer[512];
 short doing_cid = 0;
+pthread_mutex_t modemmx = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t buffermx = PTHREAD_MUTEX_INITIALIZER;
 void stmod(const char* str)
 {
+	pthread_mutex_lock(&modemmx);
 	fputs(str, modem);
 	fflush(modem);
+	pthread_mutex_unlock(&modemmx);
 }
 int close_modem(char* dev)
 {
+	pthread_mutex_lock(&modemmx);
 	if(strlen(dev) < 7) {
 		lprintf(error , "dev %s too short\n", dev);
 		return -4;
@@ -69,34 +75,42 @@ int close_modem(char* dev)
 	}
 	uu_unlock((dev+(sizeof("/dev/")-1))); 
 	fclose(modem);
+	pthread_mutex_unlock(&modemmx);
 	return 1;
 }
 int init_modem(char* dev)
 {
 	int lres = 0;
+	pthread_mutex_lock(&modemmx);
 	if(strlen(dev) < 7) {
 		lprintf(error , "dev %s too short\n", dev);
+		pthread_mutex_unlock(&modemmx);
 		return -4;
 	}
 	if(strncmp(dev, "/dev/", strlen("/dev/")) != 0) {
 		lprintf(error, "dev %s must begin with /dev/\n", dev);
+		pthread_mutex_unlock(&modemmx);
 		return -5;
 	}
 	lres = uu_lock((dev+(sizeof("/dev/")-1))); 
 	if(lres != UU_LOCK_OK) {
 		lprintf(error, "%s\n", uu_lockerr(lres));
+		pthread_mutex_unlock(&modemmx);
 		return -1;
 	}
 	modemfd = open(dev, O_RDWR);
 	if(modemfd == -1) {
 		lprintf(error, "Error opening modem %s: %s\n", dev, strerror(errno));
+		pthread_mutex_unlock(&modemmx);
 		return -2;
 	}
 	modem = fdopen(modemfd, "w+");
 	if(!modem) {
 		lprintf(error, "Error fdopening modemfd %d: %s\n", modemfd, strerror(errno));
+		pthread_mutex_unlock(&modemmx);
 		return -3;
 	}
+	pthread_mutex_unlock(&modemmx);
 	stmod(INITSTRING);
 	return 1;
 }
@@ -126,6 +140,7 @@ int modem_evalrc(char* result)
 }
 void modem_hread(char* cbuf)
 {
+	pthread_mutex_lock(&buffermx);
 	if(cou < sizeof(buffer) - 2)
 		buffer[cou] = cbuf[0];
 	if(buffer[0] == '8' && buffer[1] == '0')
@@ -150,4 +165,5 @@ void modem_hread(char* cbuf)
 	}	else {
 		cou++;
 	}
+	pthread_mutex_unlock(&buffermx);
 }

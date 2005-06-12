@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <phoned.h>
+#include <pthread.h>
 int chrcnt = 0;
 int lincnt = 1;
 int yylex(void);
@@ -17,6 +18,7 @@ int factn = 0x0;
 int ctflags = 0x0;
 extern char* yytext;
 extern struct conf cf;
+extern pthread_mutex_t cfmx;
 void yyerror(str)
 	char* str;
 {
@@ -85,7 +87,9 @@ devpath:
 	QUOTE PATH QUOTE
 	{
 		lprintf(debug, "Modem dev == %s\n", $2);
+		pthread_mutex_lock(&cfmx);
 		cf.modemdev = $2;
+		pthread_mutex_unlock(&cfmx);
 	}
 	;
 /* filters */
@@ -182,12 +186,16 @@ llvls:
 llvl:
 	LNUML OR
 	{
+		pthread_mutex_lock(&cfmx);
 		cf.loglevels |= $1;
+		pthread_mutex_unlock(&cfmx);
 	}
 	|
 	LNUML
 	{
+		pthread_mutex_lock(&cfmx);
 		cf.loglevels |= $1;
+		pthread_mutex_unlock(&cfmx);
 	}
 	;
 %%

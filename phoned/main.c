@@ -13,6 +13,7 @@
 #include <phoned.h>
 extern struct conf cf;
 short	difflog = 0;
+extern pthread_mutex_t cfmx;
 
 void usage(argv)
 	const char* argv;
@@ -25,6 +26,7 @@ int main(argc, argv)
 	char* argv[];
 {
 	int c;
+	pthread_mutex_lock(&cfmx);
 	cf.cfile = CONFIGFILE;
 #define OPTSTRING "dhc:l:"
 	while((c = getopt(argc, argv, OPTSTRING)) != -1)
@@ -47,6 +49,7 @@ int main(argc, argv)
 				return -2;
 		}
 	cf.loglevels = LL_ALL;
+	pthread_mutex_unlock(&cfmx);
 	initialize();
 	network();
 	shutd();

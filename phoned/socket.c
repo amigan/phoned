@@ -49,6 +49,8 @@
 
 extern int modemfd;
 extern FILE* modem;
+extern pthread_mutex_t modemmx;
+extern pthread_mutex_t buffermx;
 
 void *handclient(k)
 	void*	k;

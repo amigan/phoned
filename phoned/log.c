@@ -11,9 +11,12 @@
 #include <unistd.h>
 #include <phoned.h>
 #include <time.h>
+#include <pthread.h>
 
 FILE*	logf;
+pthread_mutex_t logfmx = PTHREAD_MUTEX_INITIALIZER;
 extern struct conf cf;
+extern pthread_mutex_t cfmx;
 
 int check_loglevel(lt, ll)
 	enum ltype lt;
@@ -66,13 +69,16 @@ int lprintf(enum ltype logtype, const char* fmt, ...)
 	time_t now;
 	char tmt[128];
 	now = time(NULL);
+	pthread_mutex_lock(&cfmx);
 	l = cf.loglevels;
+	pthread_mutex_unlock(&cfmx);
 	if(check_loglevel(logtype, l) != 1)
 		return -1;
 	strftime(tmt, 128, "%d%b %H:%M:%S: ", localtime(&now));
 	fmtp = fmt;
 	maxsize = strlen(fmt) + 1;
 	ofmt = malloc(sizeof(char) * (strlen(fmt) + 2));
+	pthread_mutex_lock(&logfmx);
 	fputs(tmt, logf);
 	va_start(ap, fmt);
 	while(*fmtp) {
@@ -163,6 +169,7 @@ int lprintf(enum ltype logtype, const char* fmt, ...)
 	if(fmt[strlen(fmt)-1] != '\n')
 		fputc('\n', logf);
 	fflush(logf);
+	pthread_mutex_unlock(&logfmx);
 	va_end(ap);
 	free(ofmt); /* MUST do this */
 	return cnt;

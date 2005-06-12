@@ -7,14 +7,16 @@
 #else
 #include "y.tab.h"
 #endif
+#include <pthread.h>
 #include <phoned.h>
 extern int	chrcnt, lincnt;
 extern struct conf cf; /* ewwwww */
+extern pthread_mutex_t cfmx;
 %}
 %%
 .			++chrcnt; REJECT;
 main			return MAIN;
-loglevel		cf.loglevels = LL_CRITICAL|LL_FATAL; return LLEVEL;
+loglevel		pthread_mutex_lock(&cfmx); cf.loglevels = LL_CRITICAL|LL_FATAL; pthread_mutex_unlock(&cfmx); return LLEVEL;
 all			yylval.number = LL_ALL; return LNUML;
 debug			yylval.number = LL_DEBUG; return LNUML;
 info			yylval.number = LL_INFO; return LNUML;

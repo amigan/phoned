@@ -61,7 +61,7 @@ int lprintf(enum ltype logtype, const char* fmt, ...)
 	int maxsize;
 	int tmp;
 	const char *p;
-	long num;
+	unsigned num;
 	unsigned n;
 	time_t now;
 	char tmt[128];
@@ -105,17 +105,24 @@ int lprintf(enum ltype logtype, const char* fmt, ...)
 				case 'b':
 					num = (unsigned int)va_arg(ap, int);
 					p = va_arg(ap, char *);
+					cnt += fprintf(logf, "0x%x", num);
 					if(num == 0) break;
+					/* fprintf(logf, "%d and %d", num, *p); */
 					for(tmp = 0; *p;) {
-						n = (int)p++;
+						n = (int)*p++;
 						if(num & (1 << (n - 1))) {
 							fputc(tmp ? ',' : '<', logf);
-							for(;(n = *p) > ' '; ++p)
+							cnt++;
+							for(;(n = *p) > ' '; ++p) {
 								fputc(n, logf);
+								cnt++;
+							}
 							tmp = 1;
-						} else
+						} else {
 							for(;*p > ' '; ++p)
 								continue;
+						/*fprintf(logf, "n=0x%x,nxs=0x%x,c=%d\n", n, (1 << (n-1)), (char)n); */
+						}
 					}
 					if(tmp)
 						fputc('>', logf);

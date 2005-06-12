@@ -136,6 +136,7 @@ void modem_hread(char* cbuf)
 			rc = parse_cid(buffer);
 			cid_log(rc);
 			cid_notify(rc);
+			check_condition(rc);
 			free_cid(rc);
 			memset(buffer, 0, sizeof(buffer));
 			doing_cid = 0;

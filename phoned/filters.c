@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/filters.c,v 1.8 2005/06/12 22:01:23 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/filters.c,v 1.9 2005/06/12 22:17:44 dcp1990 Exp $ */
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -159,6 +159,10 @@ void check_condition(cid)
 	int result = 0;
 	pthread_mutex_lock(&condmx);
 	c = topcond;
+	if(c == 0x0) {
+		pthread_mutex_unlock(&condmx);
+		return;
+	}
 	while(c != NULL) {
 		if(c->namerx.prex != NULL)
 			rcna = pcre_exec(c->namerx.prex, NULL, cid->name, strlen(cid->name), 0, 0, ovec, 30);

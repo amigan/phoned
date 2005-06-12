@@ -14,6 +14,7 @@ int lincnt = 1;
 int yylex(void);
 char *numrx = 0x0, *namrx = 0x0;
 int factn = 0x0;
+int ctflags = 0x0;
 extern char* yytext;
 extern struct conf cf;
 void yyerror(str)
@@ -29,9 +30,9 @@ int yywrap(void)
 }
 %}
 %token NOTIFY OBRACE CBRACE SCOLON QUOTE MODDEV MAIN LLEVEL OR
-%token FILTERS ACTION NAME PHNUM FILTER
+%token FILTERS ACTION NAME PHNUM FILTER FLAGS
  /* HANGUP IGNOREIT PLAY RECORD */
-%token <number> LNUML ACTN
+%token <number> LNUML ACTN FLAG
 %token <string> IPADDR PATH REGEX FNAME
 %%
 commands:
@@ -101,11 +102,12 @@ filtbds:
 filtbd:
 	FILTER FNAME OBRACE filtersts CBRACE
 	{
-		add_condition($2, namrx, numrx, factn);
+		add_condition($2, namrx, numrx, factn, ctflags);
 		free($2);
 		if(namrx != 0x0) free(namrx);
 		if(numrx != 0x0) free(numrx);
 		factn = 0x0;
+		ctflags = 0x0;
 	}
 	;
 filtersts:
@@ -118,6 +120,8 @@ filterst:
 	fnumb
 	|
 	faction
+	|
+	fflags
 	;
 fname:
 	NAME REGEX
@@ -129,6 +133,24 @@ fnumb:
 	PHNUM REGEX
 	{
 		numrx = $2;
+	}
+	;
+fflags:
+	FLAGS flgs
+	;
+flgs:
+	|
+	flg flgs
+	;
+flg:
+	FLAG OR
+	{
+		ctflags |= $1;
+	}
+	|
+	ACTN
+	{
+		ctflags |= $1;
 	}
 	;
 faction:

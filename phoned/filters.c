@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/filters.c,v 1.3 2005/06/12 16:30:57 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/filters.c,v 1.4 2005/06/12 18:35:44 dcp1990 Exp $ */
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -75,7 +75,8 @@ cond_t* add_condition(filtname, nameregex, numregex, action)
 		nc->numbrx.prex = 0x0;
 	}
 	nc->action = action;
-	lprintf(info, "Added filter %s, namerx = %s, numrx = %s, action = 0x%x\n",
-			filtname, nameregex, numregex, action);
+	lprintf(info, "Added filter %s, namerx = %s, numrx = %s, action = %b\n",
+			filtname, nameregex, numregex, action, "\10" SCTACT_IGN "IGNORE" SCTACT_HUP "HANGUP"
+			SCTACT_RNOT "MAIL" SCTACT_ANS "ANSWER" SCTACT_PLAY "PLAY" SCTACT_REC "RECORD\n");
 	return nc;
 }

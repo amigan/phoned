@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/notify.c,v 1.2 2005/06/02 20:49:26 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/notify.c,v 1.3 2005/06/12 22:25:55 dcp1990 Exp $ */
 #include <fcntl.h>
 #include <ctype.h>
 #include <unistd.h>
@@ -46,10 +46,13 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <errno.h>
+#include <pthread.h>
 #define HAVE_INET_INCS
 #include <phoned.h>
 addrsll_t head;
 addrsll_t *top = &head;
+pthread_mutex_t addrmx = PTHREAD_MUTEX_INITIALIZER;
+
 addrsll_t* getlast(addrsll_t* hd)
 {
 	addrsll_t *cur;
@@ -74,7 +77,9 @@ addrsll_t* allocaddr(void)
 }
 void flush_lists(void)
 {
+	pthread_mutex_lock(&addrmx);
 	freeaddrl(top);
+	pthread_mutex_unlock(&addrmx);
 }
 int cid_notify(cid_t* c)
 {
@@ -96,6 +101,7 @@ int cid_notify(cid_t* c)
 		lprintf(error, "setsockopt: %s\n", strerror(errno));
 		return -1;
 	}
+	pthread_mutex_lock(&addrmx);
 	for(cur = top; cur->next != 0x0; cur = cur->next) {
 		sin.sin_addr.s_addr = cur->addr;
 		if(connect(s, (struct sockaddr *)&sin, sizeof(sin)) < 0) {
@@ -104,6 +110,7 @@ int cid_notify(cid_t* c)
 		}
 		write(s, msg, strlen(msg) + 1);
 	}
+	pthread_mutex_unlock(&addrmx);
 	close(s);
 	return 1;
 }

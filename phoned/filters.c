@@ -27,11 +27,12 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/filters.c,v 1.1 2005/06/10 00:21:49 dcp1990 Exp $ */
-#include <strings.h>
+/* $Amigan: phoned/phoned/filters.c,v 1.2 2005/06/12 15:22:56 dcp1990 Exp $ */
+#include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <stdio.h>
 #include <phoned.h>
 
 cond_t* topcond = 0x0;
@@ -43,10 +44,10 @@ cond_t* add_condition(nameregex, numregex, action)
 	char* numregex;
 	int action;
 {
-	cont_t *c, *nc;
+	cond_t *c, *nc;
 	nc = malloc(sizeof(cond_t));
 	memset(nc, 0, sizeof(cond_t));
-	pthread_mutex_lock(condmx); /* ALWAYS do this if dealing with next, last or topcond!! */
+	pthread_mutex_lock(&condmx); /* ALWAYS do this if dealing with next, last or topcond!! */
 	if(topcond == 0x0)
 		topcond = nc;
 	else {
@@ -54,7 +55,13 @@ cond_t* add_condition(nameregex, numregex, action)
 		nc->last = c;
 		c->next = nc;
 	}
-	pthread_mutex_unlock(condmc); /* done */
+	pthread_mutex_unlock(&condmx); /* done */
 	nc->name = strdup(nameregex);
+	nc->number = strdup(numregex);
+	nc->namerx.prex = pcre_compile(nc->name, 0x0, &nc->namerx.error,
+			&nc->namerx.erroroffset, NULL);
+	nc->numbrx.prex = pcre_compile(nc->number, 0x0, &nc->numbrx.error,
+			&nc->numbrx.erroroffset, NULL);
+	nc->action = action;
 	return nc;
 }

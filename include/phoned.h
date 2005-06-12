@@ -3,7 +3,7 @@
  * (C)2005, Dan Ponte
  * BSDL w/ advert.
  */
-/* $Amigan: phoned/include/phoned.h,v 1.6 2005/06/12 18:51:06 dcp1990 Exp $ */
+/* $Amigan: phoned/include/phoned.h,v 1.7 2005/06/12 22:01:09 dcp1990 Exp $ */
 #include <pcre.h> /* fugly, I know... */
 #define VERSION "0.1"
 #define LOGFILE "/var/log/phoned.log"
@@ -82,13 +82,14 @@ typedef struct rx_t {
 	pcre* prex;
 	const char* error;
 	int erroroffset;
-} regex_t;
+	int pcresize;
+} rex_t;
 typedef struct cnd_t {
 	char* filtername;
 	char* name;
 	char* number;
-	regex_t namerx;
-	regex_t numbrx;
+	rex_t namerx;
+	rex_t numbrx;
 	int action;
 	struct af actflags;
 	int flags;
@@ -124,5 +125,7 @@ void flush_lists(void);
 void addtoaddrs(const char* par);
 void modem_hread(char* cbuf);
 void cid_log(cid_t* c);
-cond_t* add_condition(char* filtname, char* nameregex, char* numregex, int action);
+cond_t* add_condition(char* filtname, char* nameregex, char* numregex, int action, int flags);
 void free_condition(cond_t* h, short traverse);
+cond_t* copy_condition(cond_t* con);
+void check_condition(cid_t* cid);

@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/filters.c,v 1.4 2005/06/12 18:35:44 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/filters.c,v 1.5 2005/06/12 18:51:07 dcp1990 Exp $ */
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -37,8 +37,35 @@
 
 cond_t* topcond = 0x0;
 pthread_mutex_t condmx = PTHREAD_MUTEX_INITIALIZER;
+void free_cond_elms(cond)
+	cond_t* cond;
+{
+	free(cond->name);
+	free(cond->number);
+	free(cond->filtname);
+	free(cond->namex.prex);
+}
+void free_condition(h, traverse)
+	cond_t* h;
+	short traverse;
+{
+	cond_t *ls, *c, *tp;
+	tp = h;
+	if(tp == 0x0) return;
+	if(traverse) {
+		c = tp;
+		while(c > 0x0) {
+			free_cond_elms(c);
+			ls = c;
+			c = c->next;
+			free(ls);
+		}
+	} else {
+		free_cond_elms(tp);
+		free(tp);
+	}
+}
 
-/* BROKEN! Do not use! */
 cond_t* add_condition(filtname, nameregex, numregex, action)
 	char* filtname;
 	char* nameregex;

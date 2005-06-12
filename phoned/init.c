@@ -13,12 +13,14 @@
 extern FILE*	logf;
 extern short	difflog;
 extern struct conf	cf;
+extern cond_t* topcond;
 
 void shutd(void)
 {
 	lprintf(fatal, "phoned shutting down...\n");
 	close_modem(cf.modemdev);
 	flush_lists();
+	free_condition(topcond, 0x1);
 	fclose(logf);
 	unlink(SOCKETFILE);
 }

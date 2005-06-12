@@ -148,7 +148,7 @@ flg:
 		ctflags |= $1;
 	}
 	|
-	ACTN
+	FLAG
 	{
 		ctflags |= $1;
 	}

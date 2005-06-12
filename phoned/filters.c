@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/filters.c,v 1.5 2005/06/12 18:51:07 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/filters.c,v 1.6 2005/06/12 18:53:52 dcp1990 Exp $ */
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -52,6 +52,7 @@ void free_condition(h, traverse)
 	cond_t *ls, *c, *tp;
 	tp = h;
 	if(tp == 0x0) return;
+	pthread_mutex_lock(&condmx);
 	if(traverse) {
 		c = tp;
 		while(c > 0x0) {
@@ -64,6 +65,7 @@ void free_condition(h, traverse)
 		free_cond_elms(tp);
 		free(tp);
 	}
+	pthread_mutex_unlock(&condmx);
 }
 
 cond_t* add_condition(filtname, nameregex, numregex, action)
@@ -83,7 +85,6 @@ cond_t* add_condition(filtname, nameregex, numregex, action)
 		nc->last = c;
 		c->next = nc;
 	}
-	pthread_mutex_unlock(&condmx); /* done */
 	nc->name = strdup(filtname);
 	if(nameregex != 0x0) {
 		nc->name = strdup(nameregex);
@@ -105,5 +106,6 @@ cond_t* add_condition(filtname, nameregex, numregex, action)
 	lprintf(info, "Added filter %s, namerx = %s, numrx = %s, action = %b\n",
 			filtname, nameregex, numregex, action, "\10" SCTACT_IGN "IGNORE" SCTACT_HUP "HANGUP"
 			SCTACT_RNOT "MAIL" SCTACT_ANS "ANSWER" SCTACT_PLAY "PLAY" SCTACT_REC "RECORD\n");
+	pthread_mutex_unlock(&condmx); /* done */
 	return nc;
 }

@@ -59,6 +59,10 @@ int lprintf(enum ltype logtype, const char* fmt, ...)
 	char* str;
 	void* voi;
 	int maxsize;
+	int tmp;
+	const char *p;
+	long num;
+	unsigned n;
 	time_t now;
 	char tmt[128];
 	now = time(NULL);
@@ -97,6 +101,24 @@ int lprintf(enum ltype logtype, const char* fmt, ...)
 				case 'u':
 					uns = va_arg(ap, unsigned);
 					cnt += fprintf(logf, ofmt, uns);
+					break;
+				case 'b':
+					num = (unsigned int)va_arg(ap, int);
+					p = va_arg(ap, char *);
+					if(num == 0) break;
+					for(tmp = 0; *p;) {
+						n = (int)p++;
+						if(num & (1 << (n - 1))) {
+							fputc(tmp ? ',' : '<', logf);
+							for(;(n = *p) > ' '; ++p)
+								fputc(n, logf);
+							tmp = 1;
+						} else
+							for(;*p > ' '; ++p)
+								continue;
+					}
+					if(tmp)
+						fputc('>', logf);
 					break;
 				case 'c':
 					cha = (char) va_arg(ap, int);

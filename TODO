@@ -1,0 +1,13 @@
+$Amigan: phoned/TODO,v 1.1 2005/06/13 03:53:13 dcp1990 Exp $
+TODO
+For phoned:
+*Handle conditions (write the glue)
+*Parse socket in
+*Make modem and other stuff pluggable
+*Write rockwell voice support
+*Write answering subsystem
+For phonectl:
+*Clean up interface
+*Add ncurses mode
+For xfone:
+*Begin it

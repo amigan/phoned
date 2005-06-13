@@ -28,7 +28,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/remote.c,v 1.1 2005/06/13 21:00:07 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/remote.c,v 1.2 2005/06/13 21:04:14 dcp1990 Exp $ */
 /* system includes */
 #include <string.h>
 #include <stdio.h>
@@ -39,16 +39,6 @@
 #define MAXARGS 15
 #define CHK(m)	strcasecmp(m, argvect[cpos]) == 0
 #define RNF(m)	s->freeit = 0; free(is); return(m)
-typedef enum stat {
-	init = 0,
-	login,
-	pass
-} states_t;
-typedef struct si_t {
-	states_t st;
-	short freeit;
-	FILE* fpo;
-} state_info_t;
 
 char *parse_command(cmd, cont, s)
 	const char *cmd;
@@ -98,7 +88,7 @@ char *parse_command(cmd, cont, s)
 				RNF("500 OK: Give Me Modem tested.\n");
 			}
 			break;
-		case login:
+		case loginstage:
 			break;
 		case pass:
 			break;

@@ -3,7 +3,7 @@
  * (C)2005, Dan Ponte
  * BSDL w/ advert.
  */
-/* $Amigan: phoned/include/phoned.h,v 1.10 2005/06/13 03:40:27 dcp1990 Exp $ */
+/* $Amigan: phoned/include/phoned.h,v 1.11 2005/06/13 21:04:13 dcp1990 Exp $ */
 #include <pcre.h> /* fugly, I know... */
 #define VERSION "0.1"
 #define LOGFILE "/var/log/phoned.log"
@@ -97,6 +97,17 @@ typedef struct cnd_t {
 	struct cnd_t* last;
 	struct cnd_t* next;
 } cond_t;
+typedef enum stat {
+	init = 0,
+	loginstage,
+	pass
+} states_t;
+typedef struct si_t {
+	states_t st;
+	short freeit;
+	FILE* fpo;
+} state_info_t;
+
 #ifdef HAVE_INET_INCS
 typedef struct adll_t {
 	in_addr_t addr;
@@ -132,3 +143,5 @@ cond_t* copy_condition(cond_t* con);
 void check_condition(cid_t* cid);
 void *modem_io(void *k);
 void give_me_modem(char* str);
+char *parse_command(const char *cmd, short *cont, state_info_t *s);
+void begin_dialogue(FILE* fp);

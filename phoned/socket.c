@@ -54,11 +54,11 @@ void *handclient(k)
 	void*	k;
 {
 	int sk = (int)k;
-	char	buffer[1024];
-	int	rlen;
-	rlen = recv(sk, buffer, sizeof(buffer), 0);
-	lprintf(debug, "Client said %s.", buffer);
-	close(sk);
+	FILE* tf;
+	lprintf(info, "Incoming client.");
+	tf = fdopen(sk, "r+");
+	begin_dialogue(tf);
+	fclose(tf);
 	pthread_exit(NULL);
 	return 0;
 }

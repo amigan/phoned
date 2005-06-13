@@ -49,6 +49,7 @@ int main(argc, argv)
 				usage(strdup(*argv));
 				return -2;
 		}
+	cf.modem_tm = 0;
 	cf.loglevels = LL_ALL;
 	pthread_mutex_unlock(&cfmx);
 	initialize();

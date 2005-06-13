@@ -47,11 +47,9 @@
 
 #include <phoned.h>
 
-extern int modemfd;
-extern FILE* modem;
 extern pthread_mutex_t modemmx;
 extern pthread_mutex_t buffermx;
-
+pthread_t networkth;
 void *handclient(k)
 	void*	k;
 {
@@ -82,15 +80,18 @@ void *handclient(k)
 	return 0;
 }
 
-void network(void) /* name is misleading because we also do modem IO here */
+void *network(b)
+	void* b;
 {
 	int 		s, /* us,*/ sn;
 	fd_set		fds;
 	int		sin_size, ilen;
 	pthread_t	thr;
 	char		cbuf[1];
+	void*		 is;
 	cbuf[0] = '\0'; cbuf[1] = '\0';
 	struct sockaddr_un it;
+	is = b;
 	if((s = socket(AF_LOCAL, SOCK_STREAM, 0)) == -1) {
 		perror("socket");
 		exit(-1);
@@ -110,7 +111,6 @@ void network(void) /* name is misleading because we also do modem IO here */
 	for(;;) {
 		FD_ZERO(&fds);
 		FD_SET(s, &fds);
-		FD_SET(modemfd, &fds);
 		switch(select(s + 1, &fds, NULL, NULL, NULL)) {
 		case -1:
 			perror("select");
@@ -134,12 +134,6 @@ void network(void) /* name is misleading because we also do modem IO here */
 					lprintf(info, "Incoming connection\n"
 							,ilen);
 						
-				}
-				if(FD_ISSET(modemfd, &fds) != 0)
-				{
-					read(modemfd, cbuf, 1);
-					modem_hread(cbuf);
-					*cbuf = '\0';
 				}
 			}
 		}

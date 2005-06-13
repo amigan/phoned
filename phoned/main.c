@@ -14,7 +14,8 @@
 extern struct conf cf;
 short	difflog = 0;
 extern pthread_mutex_t cfmx;
-
+extern pthread_t networkth;
+extern pthread_t modemth;
 void usage(argv)
 	const char* argv;
 {
@@ -51,8 +52,8 @@ int main(argc, argv)
 	cf.loglevels = LL_ALL;
 	pthread_mutex_unlock(&cfmx);
 	initialize();
-	network();
-	shutd();
+	pthread_create(&networkth, NULL, network, NULL);
+	pthread_create(&modemth, NULL, modem_io, NULL);
 	pthread_exit(NULL);
 	return 0;
 }

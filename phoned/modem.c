@@ -53,6 +53,7 @@ int modemfd;
 unsigned int cou = 0;
 char buffer[512];
 short doing_cid = 0;
+pthread_t modemth;
 pthread_mutex_t modemmx = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t buffermx = PTHREAD_MUTEX_INITIALIZER;
 void stmod(const char* str)
@@ -166,4 +167,43 @@ void modem_hread(char* cbuf)
 		cou++;
 	}
 	pthread_mutex_unlock(&buffermx);
+}
+void *modem_io(k)
+	void*	k;
+{
+	fd_set	fds;
+	struct timeval tv;
+	char	cbuf[1];
+	k = 0;
+	*cbuf = '\0'; cbuf[1] = '\0';
+	pthread_mutex_lock(&modemmx);
+	for(;;) {
+		FD_ZERO(&fds);
+		FD_SET(modemfd, &fds);
+		tv.tv_sec = 2; /* tunable */
+		tv.tv_usec = 0;
+		switch(select(modemfd + 1, &fds, NULL, NULL, &tv)) {
+			case -1:
+				lprintf(error, "select on modem: %s", strerror(errno));
+				pthread_mutex_unlock(&modemmx);
+				pthread_exit(NULL);
+				break;
+			case 0:
+				pthread_mutex_unlock(&modemmx);
+				sleep(1);
+				pthread_mutex_lock(&modemmx);
+				break;
+			default:
+				{
+					if(FD_ISSET(modemfd, &fds) != 0) {
+						read(modemfd, cbuf, 1);
+						modem_hread(cbuf);
+						*cbuf = '\0';
+					}
+				}
+		}
+	}
+	pthread_mutex_unlock(&modemmx);
+	pthread_exit(NULL);
+	return 0;
 }

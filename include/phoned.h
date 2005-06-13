@@ -3,7 +3,7 @@
  * (C)2005, Dan Ponte
  * BSDL w/ advert.
  */
-/* $Amigan: phoned/include/phoned.h,v 1.7 2005/06/12 22:01:09 dcp1990 Exp $ */
+/* $Amigan: phoned/include/phoned.h,v 1.8 2005/06/13 01:13:41 dcp1990 Exp $ */
 #include <pcre.h> /* fugly, I know... */
 #define VERSION "0.1"
 #define LOGFILE "/var/log/phoned.log"
@@ -110,7 +110,7 @@ void initialize(void);
 void open_log(void);
 void read_config(void);
 void shutd(void);
-void network(void);
+void *network(void *b);
 int lprintf(enum ltype logtype, const char* fmt, ...);
 void handsig(int sig);
 void install_handlers(void);
@@ -129,3 +129,4 @@ cond_t* add_condition(char* filtname, char* nameregex, char* numregex, int actio
 void free_condition(cond_t* h, short traverse);
 cond_t* copy_condition(cond_t* con);
 void check_condition(cid_t* cid);
+void *modem_io(void *k);

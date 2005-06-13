@@ -49,11 +49,6 @@ void handsig(sig)
 		case SIGHUP:
 			lprintf(info, "Received HUP, rereading configuration files...\n");
 			break;
-#ifdef DEBUG
-		case SIGPIPE:
-			abort();
-			break;
-#endif
 		default:
 			lprintf(warn, "Received signal %d!\n", sig);
 	}

@@ -3,7 +3,7 @@
  * (C)2005, Dan Ponte
  * BSDL w/ advert.
  */
-/* $Amigan: phoned/include/phoned.h,v 1.8 2005/06/13 01:13:41 dcp1990 Exp $ */
+/* $Amigan: phoned/include/phoned.h,v 1.9 2005/06/13 01:17:54 dcp1990 Exp $ */
 #include <pcre.h> /* fugly, I know... */
 #define VERSION "0.1"
 #define LOGFILE "/var/log/phoned.log"
@@ -14,6 +14,7 @@ struct conf {
 	char* cfile;
 	char* logfile;
 	int loglevels;
+	short modem_tm;
 	char* modemdev;
 };
 #define LL_DEBUG	0x1

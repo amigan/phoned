@@ -170,6 +170,14 @@ void modem_hread(char* cbuf)
 	}
 	pthread_mutex_unlock(&buffermx);
 }
+/*
+ * XXX: this is inefficient
+ * TODO: move this so we have a global pipe that is select()ed.
+ * Threads lock its mutex, write ONE BYTE to it, and the select() receives it. The calling thread unlocks the pipe mux.
+ * This unlocks the modem mutex, waits, and tries to keep locking (maybe using a conditional)
+ * until it gets it and reselects. DO IT. (thanks jilles)
+ * Do all this after a trylock().
+ */
 void *modem_io(k)
 	void*	k;
 {

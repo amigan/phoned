@@ -56,8 +56,23 @@ short doing_cid = 0;
 extern struct conf cf;
 pthread_t modemth;
 pthread_mutex_t modemmx = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mpipemx = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t buffermx = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t mpcond = PTHREAD_COND_INITIALIZER;
+int modempipes[2];
 extern pthread_mutex_t cfmx;
+void give_me_modem(str)
+	char* str;
+{
+	pthread_mutex_lock(&mpipemx);
+	write(modempipes[1], "G", 1);
+	pthread_mutex_unlock(&mpipemx);
+	pthread_mutex_lock(&modemmx);
+	fputs(str, modem);
+	fflush(modem);
+	pthread_cond_signal(&mpcond);
+	pthread_mutex_unlock(&modemmx);
+}
 void stmod(const char* str)
 {
 	pthread_mutex_lock(&modemmx);
@@ -183,20 +198,24 @@ void *modem_io(k)
 {
 	fd_set	fds;
 	struct timeval tv;
-	char	cbuf[1];
+	char	cbuf[2];
 	short dotm = 0;
 	k = 0;
 	*cbuf = '\0'; cbuf[1] = '\0';
+	pthread_mutex_lock(&mpipemx);
+	pipe(modempipes);
+	pthread_mutex_unlock(&mpipemx);
 	pthread_mutex_lock(&modemmx);
 	for(;;) {
 		pthread_mutex_lock(&cfmx);
-		dotm = cf.modem_tm;
+	/*	dotm = cf.modem_tm; */
 		pthread_mutex_unlock(&cfmx);
 		FD_ZERO(&fds);
 		FD_SET(modemfd, &fds);
-		tv.tv_sec = 2; /* tunable */
-		tv.tv_usec = 0;
-		switch(select(modemfd + 1, &fds, NULL, NULL, dotm ? &tv : NULL)) {
+		FD_SET(modempipes[0], &fds);
+	/*	tv.tv_sec = 2;  tunable */
+	/*	tv.tv_usec = 0; */
+		switch(select(modempipes[0] + 1, &fds, NULL, NULL, /* dotm ? &tv :*/ NULL)) {
 			case -1:
 				lprintf(error, "select on modem: %s", strerror(errno));
 				pthread_mutex_unlock(&modemmx);
@@ -213,6 +232,10 @@ void *modem_io(k)
 						read(modemfd, cbuf, 1);
 						modem_hread(cbuf);
 						*cbuf = '\0';
+					}
+					if(FD_ISSET(modempipes[0], &fds) != 0) {
+						read(modempipes[0], cbuf, 1);
+						pthread_cond_wait(&mpcond, &modemmx);
 					}
 				}
 		}

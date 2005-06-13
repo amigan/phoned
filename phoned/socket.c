@@ -74,6 +74,8 @@ void *handclient(k)
 		lprintf(info, "nam=%s;month=%d\n", rc->name, rc->month);
 		cid_notify(rc);
 		cid_log(rc);
+	} else if(strcmp(buffer, "gmm") == 0) {
+		give_me_modem("AT\r\n");
 	}
 	close(sk);
 	pthread_exit(NULL);

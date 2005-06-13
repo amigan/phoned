@@ -1,6 +1,6 @@
 # cnd Makefile
 # (C)2005, Dan Ponte
-# $Amigan: phoned/phoned/Makefile,v 1.9 2005/06/12 15:22:56 dcp1990 Exp $
+# $Amigan: phoned/phoned/Makefile,v 1.10 2005/06/13 21:00:07 dcp1990 Exp $
 include ../global.mk
 # basic stuff. we append for a reason.
 CPPFLAGS+=-I../include -DDEBUG -DYY_NO_UNPUT
@@ -8,8 +8,8 @@ CFLAGS+=-g -Wall -W -ansi ${CPPFLAGS} -pthread
 LDFLAGS+=-lutil -lpcre
 # keep these up to date.
 MAINBIN=phoned
-SRCS=main.c init.c log.c cfg.c socket.c y.tab.c lex.yy.c signals.c cid.c modem.c notify.c filters.c
-OBJS=main.o init.o log.o cfg.o socket.o y.tab.o lex.yy.o signals.o cid.o modem.o notify.o filters.o
+SRCS=main.c init.c log.c cfg.c socket.c y.tab.c lex.yy.c signals.c cid.c modem.c notify.c filters.c remote.c
+OBJS=main.o init.o log.o cfg.o socket.o y.tab.o lex.yy.o signals.o cid.o modem.o notify.o filters.o remote.o
 OHDRS=y.tab.h
 CLEANFILES=y.tab.c y.tab.h lex.yy.c
 LEX=lex

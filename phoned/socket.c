@@ -58,25 +58,6 @@ void *handclient(k)
 	int	rlen;
 	rlen = recv(sk, buffer, sizeof(buffer), 0);
 	lprintf(debug, "Client said %s.", buffer);
-	if(strcmp(buffer, "tnotify") == 0) {
-		cid_t c;
-		c.number = "7823020300";
-		c.name = "BUSH,GEORGE W.";
-		c.day = 2;
-		c.hour = 3;
-		c.month = 4;
-		c.minute = 20;
-		cid_notify(&c);
-		cid_log(&c);
-	} else if(strcmp(buffer, "tparse") == 0) {
-		cid_t* rc;
-		rc = parse_cid("802701083132323130383234070F5354414E444953482048454154494E020A343031333937333337325C\n");
-		lprintf(info, "nam=%s;month=%d\n", rc->name, rc->month);
-		cid_notify(rc);
-		cid_log(rc);
-	} else if(strcmp(buffer, "gmm") == 0) {
-		give_me_modem("AT\r\n");
-	}
 	close(sk);
 	pthread_exit(NULL);
 	return 0;

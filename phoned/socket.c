@@ -55,9 +55,8 @@ void *handclient(k)
 {
 	int sk = (int)k;
 	FILE* tf;
-	lprintf(info, "Incoming client.");
 	tf = fdopen(sk, "r+");
-	begin_dialogue(tf);
+	begin_dialogue(tf, sk);
 	fclose(tf);
 	pthread_exit(NULL);
 	return 0;

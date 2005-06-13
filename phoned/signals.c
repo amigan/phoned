@@ -42,7 +42,6 @@ void handsig(sig)
 		case SIGINT:
 		case SIGQUIT:
 		case SIGTERM:
-		case SIGPIPE:
 			lprintf(fatal, "Received signal %d, cleaning up...\n", sig);
 			shutd();
 			exit(0);
@@ -50,6 +49,11 @@ void handsig(sig)
 		case SIGHUP:
 			lprintf(info, "Received HUP, rereading configuration files...\n");
 			break;
+#ifdef DEBUG
+		case SIGPIPE:
+			abort();
+			break;
+#endif
 		default:
 			lprintf(warn, "Received signal %d!\n", sig);
 	}

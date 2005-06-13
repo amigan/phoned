@@ -28,11 +28,13 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/remote.c,v 1.2 2005/06/13 21:04:14 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/remote.c,v 1.3 2005/06/13 22:02:27 dcp1990 Exp $ */
 /* system includes */
 #include <string.h>
 #include <stdio.h>
 #include <pthread.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 /* us */
 #include <phoned.h>
 #define MAXBUFSIZE 512
@@ -75,6 +77,7 @@ char *parse_command(cmd, cont, s)
 				c.minute = 20;
 				cid_notify(&c);
 				cid_log(&c);
+				*cont = 0;
 				RNF("500 OK: Notify tested.\n");
 			} else if(CHK("tparse")) {
 				cid_t* rc;
@@ -82,9 +85,11 @@ char *parse_command(cmd, cont, s)
 				lprintf(info, "nam=%s;month=%d\n", rc->name, rc->month);
 				cid_notify(rc);
 				cid_log(rc);
+				*cont = 0;
 				RNF("500 OK: Parser tested.\n");
 			} else if(CHK("gmm")) {
 				give_me_modem(argvect[1] != NULL ? argvect[1] : "AT\r\n");
+				*cont = 0;
 				RNF("500 OK: Give Me Modem tested.\n");
 			}
 			break;
@@ -95,8 +100,9 @@ char *parse_command(cmd, cont, s)
 	}
 	return NULL;
 }
-void begin_dialogue(fp)
+void begin_dialogue(fp, fd)
 	FILE* fp;
+	int fd;
 {
 	char buffer[MAXBUFSIZE]; /* molto importante */
 	char *rcode, *c;
@@ -104,13 +110,14 @@ void begin_dialogue(fp)
 	state_info_t si;
 	memset(&si, 0, sizeof(state_info_t));
 	si.fpo = fp; /* this is JUST for data, not real commands */
+	si.fd = fd;
 	while(keep_going == 0x1 && !feof(fp)) {
-		if(fgets(buffer, MAXBUFSIZE, fp) == 0x0) break;
+		if(recv(fd, buffer, MAXBUFSIZE - 1, 0x0) == -1) break;
 		if((c = strrchr(buffer, '\n')) != NULL)
 			*c = '\0';
 		rcode = parse_command(buffer, &keep_going, &si);
 		if(rcode != NULL) {
-			fputs(rcode, fp);
+			send(fd, rcode, strlen(rcode) + 1, 0);
 			if(si.freeit) free(rcode);
 		}
 	}

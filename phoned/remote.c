@@ -28,13 +28,14 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/remote.c,v 1.3 2005/06/13 22:02:27 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/remote.c,v 1.4 2005/06/13 22:16:09 dcp1990 Exp $ */
 /* system includes */
 #include <string.h>
 #include <stdio.h>
 #include <pthread.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <errno.h>
 /* us */
 #include <phoned.h>
 #define MAXBUFSIZE 512
@@ -107,17 +108,28 @@ void begin_dialogue(fp, fd)
 	char buffer[MAXBUFSIZE]; /* molto importante */
 	char *rcode, *c;
 	short keep_going = 0x1;
+	int rc = 0;
 	state_info_t si;
 	memset(&si, 0, sizeof(state_info_t));
 	si.fpo = fp; /* this is JUST for data, not real commands */
 	si.fd = fd;
 	while(keep_going == 0x1 && !feof(fp)) {
-		if(recv(fd, buffer, MAXBUFSIZE - 1, 0x0) == -1) break;
+		rc = recv(fd, buffer, MAXBUFSIZE - 1, 0x0);
+		if(rc == 0) {
+			lprintf(debug, "Socket closed! Got zero!\n");
+			break;
+		} else if(rc == -1) {
+			lprintf(error, "Error with recv: %s\n", strerror(errno));
+			break;
+		}
 		if((c = strrchr(buffer, '\n')) != NULL)
 			*c = '\0';
 		rcode = parse_command(buffer, &keep_going, &si);
 		if(rcode != NULL) {
-			send(fd, rcode, strlen(rcode) + 1, 0);
+			if(send(fd, rcode, strlen(rcode) + 1, 0) == 0x0) {
+				lprintf(error, "Error: (send() inside begin_dialogue()): %s\n", strerror(errno));
+				break;
+			}
 			if(si.freeit) free(rcode);
 		}
 	}

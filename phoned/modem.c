@@ -130,6 +130,9 @@ int init_modem(char* dev)
 	}
 	pthread_mutex_unlock(&modemmx);
 	stmod(INITSTRING);
+	pthread_mutex_lock(&mpipemx);
+	pipe(modempipes);
+	pthread_mutex_unlock(&mpipemx);
 	return 1;
 }
 int modem_evalrc(char* result)
@@ -197,14 +200,11 @@ void *modem_io(k)
 	void*	k;
 {
 	fd_set	fds;
-	struct timeval tv;
+	/* struct timeval tv; 
+	short dotm = 0; */
 	char	cbuf[2];
-	short dotm = 0;
 	k = 0;
 	*cbuf = '\0'; cbuf[1] = '\0';
-	pthread_mutex_lock(&mpipemx);
-	pipe(modempipes);
-	pthread_mutex_unlock(&mpipemx);
 	pthread_mutex_lock(&modemmx);
 	for(;;) {
 		pthread_mutex_lock(&cfmx);

@@ -7,20 +7,21 @@
  *
  */
 
-#include "../include/voice.h"
+#include <stdio.h>
+#include "pvf.h"
 
 /* Forward defs of the format-specific routines
  */
-static int pvftousrgsm (FILE *fd_in, FILE *fd_out, pvf_header *header_in);
+/* static int pvftousrgsm (FILE *fd_in, FILE *fd_out, pvf_header *header_in); */
 static int pvftousradpcm (FILE *fd_in, FILE *fd_out, pvf_header *header_in);
-static int usrgsmtopvf (FILE *fd_in, FILE *fd_out, pvf_header *header_out);
+/* static int usrgsmtopvf (FILE *fd_in, FILE *fd_out, pvf_header *header_out); */
 static int usradpcmtopvf (FILE *fd_in, FILE *fd_out, pvf_header *header_out);
 
 int pvftousr(FILE *fd_in, FILE *fd_out, int compression,
              pvf_header *header_in) {
   switch (compression) {
-    case 1:
-      return (pvftousrgsm(fd_in, fd_out, header_in));
+    /*case 1:
+      return (pvftousrgsm(fd_in, fd_out, header_in)); */
     case 4:
       return (pvftousradpcm(fd_in, fd_out, header_in));
     default:
@@ -31,15 +32,15 @@ int pvftousr(FILE *fd_in, FILE *fd_out, int compression,
 int usrtopvf (FILE *fd_in, FILE *fd_out, int compression,
                      pvf_header *header_out) {
   switch (compression) {
-    case 1:
-      return (usrgsmtopvf(fd_in, fd_out, header_out));
+/*    case 1:
+      return (usrgsmtopvf(fd_in, fd_out, header_out)); */
     case 4:
       return (usradpcmtopvf(fd_in, fd_out, header_out));
     default:
       return -1;
   }
 }
-
+#if 0
 /*****************
  ** GSM SECTION **
  *****************/
@@ -188,7 +189,7 @@ static int usrgsmtopvf (FILE *fd_in, FILE *fd_out, pvf_header *header_out)
      }
      return(OK);
 }
-
+#endif
 
 
 /*******************

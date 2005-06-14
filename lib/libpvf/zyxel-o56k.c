@@ -19,8 +19,9 @@
  * $Id: zyxel-o56k.c,v 1.1 2000/07/22 10:01:01 marcs Exp $
  *
  */
-
-#include "../include/voice.h"
+#include <string.h>
+#include <stdio.h>
+#include "pvf.h"
 
 #define BL 16380
 

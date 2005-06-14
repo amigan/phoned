@@ -59,9 +59,8 @@
  */
 
 #define RV_HONOUR_SILENCE_CODEWORDS
-
-#include "../include/voice.h"
-
+#include <stdio.h>
+#include "pvf.h"
 /*
    PJ:
    A first attempt to implement basically all that the original

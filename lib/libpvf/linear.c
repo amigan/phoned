@@ -6,9 +6,9 @@
  * $Id: linear.c,v 1.5 1999/03/16 09:59:20 marcs Exp $
  *
  */
-
-#include "../include/voice.h"
-
+#include <stdio.h>
+#include <string.h>
+#include "pvf.h"
 int pvftolin (FILE *fd_in, FILE *fd_out, pvf_header *header_in, int is_signed,
  int bits16, int intel)
      {

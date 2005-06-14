@@ -8,9 +8,8 @@
  * $Id: multitech.c,v 1.3 1998/09/09 21:07:02 gert Exp $
  *
  */
-
-#include "../include/voice.h"
-
+#include <stdio.h>
+#include "pvf.h"
 /***********************************************************
 Copyright 1992 by Stichting Mathematisch Centrum, Amsterdam, The
 Netherlands.
@@ -57,7 +56,7 @@ OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ** - Changed some of the variable names to be more meaningful.
 */
 
-#include "../include/adpcm.h"
+#include "adpcm.h"
 #include <stdio.h> /*DBG*/
 
 #ifndef __STDC__

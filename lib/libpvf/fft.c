@@ -6,9 +6,10 @@
  * $Id: fft.c,v 1.5 1999/03/16 09:59:19 marcs Exp $
  *
  */
-
-#include "../include/voice.h"
-
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+#include "pvf.h"
 
 static void fft (float *real, float *imag, int n)
      {
@@ -99,8 +100,8 @@ int pvffft (FILE *fd_in, pvf_header *header_in, int skip, int sample_size,
           if (((i & 0x01) != 0) && (i != 1))
                {
                fprintf(stderr, "%s: sample size (%d) must be a power of 2\n",
-                program_name, sample_size);
-               return(ERROR);
+                "libpvf", sample_size);
+               return(0);
                }
 
           }
@@ -110,8 +111,8 @@ int pvffft (FILE *fd_in, pvf_header *header_in, int skip, int sample_size,
 
      if ((real == NULL) || (imag == NULL))
           {
-          fprintf(stderr, "%s: not enough memory\n", program_name);
-          return(ERROR);
+          fprintf(stderr, "%s: not enough memory\n", "libpvf");
+          return(0);
           }
 
      for(i = 0; i < sample_size; i++)
@@ -144,8 +145,8 @@ int pvffft (FILE *fd_in, pvf_header *header_in, int skip, int sample_size,
                 */
 
                fprintf(stderr, "%s: not enough samples available\n",
-                program_name);
-               return(ERROR);
+                "libpvf");
+               return(0);
                }
 
           }
@@ -185,7 +186,7 @@ int pvffft (FILE *fd_in, pvf_header *header_in, int skip, int sample_size,
           if (sum < threshold)
                kill(vgetty_pid, SIGUSR2);
 
-          return(OK);
+          return(1);
           }
 
      if (display)
@@ -196,9 +197,9 @@ int pvffft (FILE *fd_in, pvf_header *header_in, int skip, int sample_size,
                 header_in->speed, sqrt(real[i] * real[i] +
                 imag[i] * imag[i]) / max);
 
-          return(OK);
+          return(1);
           };
 
-     printf("%s: FFT level is %g\n", program_name, sum);
-     return(OK);
+     printf("%s: FFT level is %g\n", "libpvf", sum);
+     return(1);
      }

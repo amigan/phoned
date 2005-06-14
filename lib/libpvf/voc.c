@@ -6,9 +6,9 @@
  * $Id: voc.c,v 1.4 1998/09/09 21:07:05 gert Exp $
  *
  */
-
-#include "../include/voice.h"
-
+#include <string.h>
+#include <stdio.h>
+#include "pvf.h"
 static char voc_hdr[32] =
      {
      'C','r','e','a','t','i','v','e',' ',

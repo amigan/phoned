@@ -6,9 +6,9 @@
  * $Id: au.c,v 1.6 2001/05/14 09:52:30 marcs Exp $
  *
  */
-
-#include "../include/voice.h"
-
+#include <stdio.h>
+#include <string.h>
+#include "pvf.h"
 typedef long Word; /* must be 32 bits */
 
 typedef struct
@@ -245,7 +245,7 @@ unsigned char alaw2ulaw (unsigned char alawbyte)
      }
 
 
-static Word read_word (FILE *in)
+static Word read_word (FILE* in)
      {
      Word w;
 
@@ -363,11 +363,11 @@ int pvftoau (FILE *fd_in, FILE *fd_out, pvf_header *header_in,
                break;
           default:
                fprintf(stderr, "%s: unsupported sound file format requested",
-                program_name);
-               return(ERROR);
+                "libpvf");
+               return(-1);
           }
 
-     return(OK);
+     return(1);
      }
 
 int autopvf (FILE *fd_in, FILE *fd_out, pvf_header *header_out)
@@ -387,8 +387,8 @@ int autopvf (FILE *fd_in, FILE *fd_out, pvf_header *header_out)
      if (hdr.magic != SND_MAGIC)
           {
           fprintf(stderr, "%s: illegal magic number for an .au file",
-           program_name);
-          return(ERROR);
+           "libpvf");
+          return(0);
           }
 
 #ifdef PRINT_INFO
@@ -397,7 +397,7 @@ int autopvf (FILE *fd_in, FILE *fd_out, pvf_header *header_out)
 
      if ((hdr.dataFormat >= 0) && (hdr.dataFormat < (sizeof(sound_format) /
       sizeof(sound_format[0]))))
-          printf("%s: Data format: %s\n", program_name,
+          printf("%s: Data format: %s\n", "libpvf",
            sound_format[hdr.dataFormat]);
      else
           printf("%s: Data format unknown, code=%ld\n", prgoram_name,
@@ -412,17 +412,17 @@ int autopvf (FILE *fd_in, FILE *fd_out, pvf_header *header_out)
      if (hdr.channelCount != 1)
           {
           fprintf(stderr, "%s: number of channels (%ld) is not 1\n",
-           program_name, hdr.channelCount);
-          return(ERROR);
+           "libpvf", hdr.channelCount);
+          return(0);
           }
 
      header_out->speed = hdr.samplingRate;
 
-     if (write_pvf_header(fd_out, header_out) != OK)
+     if (write_pvf_header(fd_out, header_out) != 1)
           {
           fprintf(stderr, "%s: could not write pvf header\n",
-           program_name);
-          return(ERROR);
+           "libpvf");
+          return(0);
           };
 
      for (i = ftell(fd_in); i < hdr.dataLocation; i++)
@@ -430,8 +430,8 @@ int autopvf (FILE *fd_in, FILE *fd_out, pvf_header *header_out)
           if (getc(fd_in) == EOF)
                {
                fprintf(stderr, "%s: unexpected end of file\n",
-                program_name);
-               return(ERROR);
+                "libpvf");
+               return(0);
                }
 
      switch (hdr.dataFormat)
@@ -478,11 +478,11 @@ int autopvf (FILE *fd_in, FILE *fd_out, pvf_header *header_out)
                break;
           default:
                fprintf(stderr, "%s: unsupported or illegal sound encoding\n",
-                program_name);
-               return(ERROR);
+                "libpvf");
+               return(0);
           }
 
-     return(OK);
+     return(1);
      }
 
 int pvftoulaw(FILE *fd_in, FILE *fd_out, pvf_header *header_in)
@@ -492,8 +492,8 @@ int pvftoulaw(FILE *fd_in, FILE *fd_out, pvf_header *header_in)
      if (header_in->speed != 8000)
           {
           fprintf(stderr, "%s: sample speed (%d) must be 8000\n",
-           program_name, header_in->speed);
-          return(ERROR);
+           "libpvf", header_in->speed);
+          return(0);
           };
 
      while (1)
@@ -504,7 +504,7 @@ int pvftoulaw(FILE *fd_in, FILE *fd_out, pvf_header *header_in)
           putc(linear2ulaw(sample), fd_out);
           }
 
-     return(OK);
+     return(1);
      }
 
 int ulawtopvf(FILE *fd_in, FILE *fd_out, pvf_header *header_out)
@@ -514,14 +514,14 @@ int ulawtopvf(FILE *fd_in, FILE *fd_out, pvf_header *header_out)
      if (header_out->speed != 8000)
           {
           fprintf(stderr, "%s: sample speed (%d) must be 8000\n",
-           program_name, header_out->speed);
-          return(ERROR);
+           "libpvf", header_out->speed);
+          return(0);
           };
 
      while ((sample = getc(fd_in)) != EOF)
           header_out->write_pvf_data(fd_out, ulaw2linear(sample) << 8);
 
-     return(OK);
+     return(1);
      }
 
 int pvftoalaw(FILE *fd_in, FILE *fd_out, pvf_header *header_in)
@@ -531,8 +531,8 @@ int pvftoalaw(FILE *fd_in, FILE *fd_out, pvf_header *header_in)
      if (header_in->speed != 8000)
           {
           fprintf(stderr, "%s: sample speed (%d) must be 8000\n",
-           program_name, header_in->speed);
-          return(ERROR);
+           "libpvf", header_in->speed);
+          return(0);
           };
 
      while (1)
@@ -543,7 +543,7 @@ int pvftoalaw(FILE *fd_in, FILE *fd_out, pvf_header *header_in)
           putc(ulaw2alaw(linear2ulaw(sample)), fd_out);
           }
 
-     return(OK);
+     return(1);
      }
 
 int alawtopvf(FILE *fd_in, FILE *fd_out, pvf_header *header_out)
@@ -553,12 +553,12 @@ int alawtopvf(FILE *fd_in, FILE *fd_out, pvf_header *header_out)
      if (header_out->speed != 8000)
           {
           fprintf(stderr, "%s: sample speed (%d) must be 8000\n",
-           program_name, header_out->speed);
-          return(ERROR);
+           "libpvf", header_out->speed);
+          return(0);
           };
 
      while ((sample = getc(fd_in)) != EOF)
           header_out->write_pvf_data(fd_out, ulaw2linear(alaw2ulaw(sample)) << 8);
 
-     return(OK);
+     return(1);
      }

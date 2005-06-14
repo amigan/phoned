@@ -9,9 +9,9 @@
  *
  * $Id: wav.c,v 1.6 2000/07/22 09:57:46 marcs Exp $
  */
-
-#include "../include/voice.h"
-
+#include <string.h>
+#include <stdio.h>
+#include "pvf.h"
 char *sizes[] =
      {
      "NONSENSE!",

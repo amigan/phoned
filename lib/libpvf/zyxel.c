@@ -11,8 +11,9 @@
  * $Id: zyxel.c,v 1.4 1998/09/09 21:07:06 gert Exp $
  *
  */
-
-#include "../include/voice.h"
+#include <stdio.h>
+#include <string.h>
+#include "pvf.h"
 
 static int Mx[3][8] =
      {

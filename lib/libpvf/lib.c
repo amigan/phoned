@@ -7,8 +7,10 @@
  *
  */
 
-#include "../include/voice.h"
-
+#include <stdio.h>
+#include <string.h>
+#include <arpa/inet.h>
+#include "pvf.h"
 rmd_header init_rmd_header = {"RMD1", "", 0x0000, 0, 0, {0x00, 0x00, 0x00,
  0x00, 0x00, 0x00, 0x00}};
 state_t init_state = {0x0000, 0};
@@ -89,18 +91,18 @@ int read_rmd_header(FILE *fd_in, rmd_header *header_in)
 
      if (fread(header_in, sizeof(rmd_header), 1, fd_in) != 1)
           {
-          fprintf(stderr, "%s: Could not read rmd header\n", program_name);
-          return(FAIL);
+          fprintf(stderr, "%s: Could not read rmd header\n", "libpvf");
+          return(-1);
           };
 
      if (strncmp(header_in->magic, "RMD1", 4) != 0)
           {
           fprintf(stderr, "%s: No rmd (raw modem data) header found\n",
-           program_name);
-          return(FAIL);
+           "libpvf");
+          return(-1);
           };
 
-     return(OK);
+     return(1);
      }
 
 int write_rmd_header(FILE *fd_out, rmd_header *header_out)
@@ -108,11 +110,11 @@ int write_rmd_header(FILE *fd_out, rmd_header *header_out)
 
      if (fwrite(header_out, sizeof(rmd_header), 1, fd_out) != 1)
           {
-          fprintf(stderr, "%s: Could not write rmd header\n", program_name);
-          return(FAIL);
+          fprintf(stderr, "%s: Could not write rmd header\n", "libpvf");
+          return(-1);
           };
 
-     return(OK);
+     return(1);
      }
 
 static int read_pvf_data_8_ascii(FILE *fd_in)
@@ -265,8 +267,8 @@ int read_pvf_header(FILE *fd_in, pvf_header *header_in)
 
      if (fread(&buffer, 5, 1, fd_in) != 1)
           {
-          fprintf(stderr, "%s: Could not read pvf header\n", program_name);
-          return(FAIL);
+          fprintf(stderr, "%s: Could not read pvf header\n", "libpvf");
+          return(-1);
           };
 
      if (strncmp(buffer, "PVF1\n", 5) == 0)
@@ -276,8 +278,8 @@ int read_pvf_header(FILE *fd_in, pvf_header *header_in)
      else
           {
           fprintf(stderr, "%s: No pvf (portable voice format) header found\n",
-           program_name);
-          return(FAIL);
+           "libpvf");
+          return(-1);
           };
 
      for (i = 0; i < VOICE_BUF_LEN; i++)
@@ -285,8 +287,8 @@ int read_pvf_header(FILE *fd_in, pvf_header *header_in)
 
           if (fread(&buffer[i], 1, 1, fd_in) != 1)
                {
-               fprintf(stderr, "%s: Could not read pvf header\n", program_name);
-               return(FAIL);
+               fprintf(stderr, "%s: Could not read pvf header\n", "libpvf");
+               return(-1);
                };
 
           if (buffer[i] == '\n')
@@ -301,23 +303,23 @@ int read_pvf_header(FILE *fd_in, pvf_header *header_in)
      if ((header_in->channels < 1) || (32 < header_in->channels))
           {
           fprintf(stderr, "%s: Invalid number of channels (%d)\n",
-           program_name, header_in->channels);
-          return(FAIL);
+           "libpvf", header_in->channels);
+          return(-1);
           };
 
      if ((header_in->speed < 0) || (50000 < header_in->speed))
           {
-          fprintf(stderr, "%s: Invalid sample speed (%d)\n", program_name,
+          fprintf(stderr, "%s: Invalid sample speed (%d)\n", "libpvf",
            header_in->speed);
-          return(FAIL);
+          return(-1);
           };
 
      if ((header_in->nbits != 8) && (header_in->nbits != 16) &&
       (header_in->nbits != 32))
           {
           fprintf(stderr, "%s: Invalid number of bits (%d) per sample\n",
-           program_name, header_in->nbits);
-          return(FAIL);
+           "libpvf", header_in->nbits);
+          return(-1);
           };
 
      if (header_in->ascii)
@@ -336,8 +338,8 @@ int read_pvf_header(FILE *fd_in, pvf_header *header_in)
                     break;
                default:
                     fprintf(stderr, "%s: Illegal bit size for pvf input\n",
-                     program_name);
-                    return(FAIL);
+                     "libpvf");
+                    return(-1);
                };
 
           }
@@ -357,13 +359,13 @@ int read_pvf_header(FILE *fd_in, pvf_header *header_in)
                     break;
                default:
                     fprintf(stderr, "%s: Illegal bit size for pvf input\n",
-                     program_name);
-                    return(FAIL);
+                     "libpvf");
+                    return(-1);
                };
 
           };
 
-     return(OK);
+     return(1);
      }
 
 int write_pvf_header(FILE *fd_out, pvf_header *header_out)
@@ -388,8 +390,8 @@ int write_pvf_header(FILE *fd_out, pvf_header *header_out)
                     break;
                default:
                     fprintf(stderr, "%s: Illegal bit size for pvf output\n",
-                     program_name);
-                    return(FAIL);
+                     "libpvf");
+                    return(-1);
                };
 
           }
@@ -411,19 +413,19 @@ int write_pvf_header(FILE *fd_out, pvf_header *header_out)
                     break;
                default:
                     fprintf(stderr, "%s: Illegal bit size for pvf output\n",
-                     program_name);
-                    return(FAIL);
+                     "libpvf");
+                    return(-1);
                };
 
           };
 
      if (fwrite(&buffer, strlen(buffer), 1, fd_out) != 1)
           {
-          fprintf(stderr, "%s: Could not write pvf header\n", program_name);
-          return(FAIL);
+          fprintf(stderr, "%s: Could not write pvf header\n", "libpvf");
+          return(-1);
           };
 
-     return(OK);
+     return(1);
      }
 
 pvf_header init_pvf_header = {FALSE, 1, 8000, 32, &read_pvf_data_32,

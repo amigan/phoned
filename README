@@ -1,4 +1,4 @@
-$Amigan: phoned/README,v 1.3 2005/06/14 02:07:13 dcp1990 Exp $
+$Amigan: phoned/README,v 1.4 2005/06/14 02:45:36 dcp1990 Exp $
 +=======================================+
 |		phoned			|
 |	(C)2005, Dan Ponte		|
@@ -14,6 +14,10 @@ To build, simply type 'make'. phoned was written for BSD make (just "make"
 on regular BSD systems, "pmake" on many linux machines.) For further
 installation instructions, please see doc/install_guide.txt.
 
+NOTE that lib/libpvf/ (library for converting from rockwell and other
+formats to pvf, a portable format) is GPL'd code. However, I don't forsee
+many troubles, since the BSD license is compatible.
+
 You will find the following directories in this source archive:
 
 cnd/ - Caller ID program
@@ -23,8 +27,6 @@ include/ - global include files
 lib/ - API libraries
 phonectl/ - command line client to phoned
 phoned/ - main phone daemon written in C
-voice/ - import of vgetty sources (under the GPL, but we don't have the
-advert clause...)
 xfone/ - Tcl/Tk interface to phoned
 
 dcp1990@neptune.atopia.net - http://www.theamigan.net/phoned/index.html

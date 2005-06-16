@@ -28,7 +28,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/remote.c,v 1.4 2005/06/13 22:16:09 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/remote.c,v 1.5 2005/06/16 20:57:10 dcp1990 Exp $ */
 /* system includes */
 #include <string.h>
 #include <stdio.h>
@@ -89,7 +89,7 @@ char *parse_command(cmd, cont, s)
 				*cont = 0;
 				RNF("500 OK: Parser tested.\n");
 			} else if(CHK("gmm")) {
-				give_me_modem(argvect[1] != NULL ? argvect[1] : "AT\r\n");
+				stmod(argvect[1] != NULL ? argvect[1] : "AT\r\n");
 				*cont = 0;
 				RNF("500 OK: Give Me Modem tested.\n");
 			}

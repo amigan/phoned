@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/filters.c,v 1.9 2005/06/12 22:17:44 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/filters.c,v 1.10 2005/06/16 21:05:00 dcp1990 Exp $ */
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -195,7 +195,10 @@ void check_condition(cid)
 			continue;
 		}
 		if(c->action & CTACT_HUP) {
-			lprintf(error, "Hangup not yet implemented! Check back later. (cond %s)\n", c->filtername);
+			modem_pickup();
+			sleep(2);
+			modem_hangup();
+			lprintf(info, "Hangup! (%s)\n", c->filtername);
 		}
 		if(c->action & CTACT_RNOT) {
 			lprintf(error, "Mail not yet implemented! Check back later. (cond %s)\n", c->filtername);

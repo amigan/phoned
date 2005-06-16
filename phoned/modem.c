@@ -46,7 +46,9 @@
 #include <errno.h>
 #include <pthread.h>
 #include <phoned.h>
-#define INITSTRING "ATZ\r\nAT E0 #CID=2 V0\r\n"
+#define ROCKWELL_INITSTRING	"ATZ\r\nAT E0 #CID=2 V0\r\n"
+#define ROCKWELL_PICKUP		"ATH1\r\n"
+#define ROCKWELL_HANGUP		"ATH\r\n"
 /* globals */
 FILE* modem;
 int modemfd;
@@ -56,29 +58,33 @@ short doing_cid = 0;
 extern struct conf cf;
 pthread_t modemth;
 pthread_mutex_t modemmx = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t miomx = PTHREAD_MUTEX_INITIALIZER; /* is modem_io() running? */
 pthread_mutex_t mpipemx = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t buffermx = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t mpcond = PTHREAD_COND_INITIALIZER;
 int modempipes[2];
 extern pthread_mutex_t cfmx;
-void give_me_modem(str)
-	char* str;
+void stmod(str)
+	const char* str;
 {
-	pthread_mutex_lock(&mpipemx);
-	write(modempipes[1], "G", 1);
-	pthread_mutex_unlock(&mpipemx);
-	pthread_mutex_lock(&modemmx);
-	fputs(str, modem);
-	fflush(modem);
-	pthread_cond_signal(&mpcond);
-	pthread_mutex_unlock(&modemmx);
+	if(pthread_mutex_trylock(&modemmx) != 0 && pthread_mutex_trylock(&miomx) == 0) {
+		pthread_mutex_lock(&mpipemx);
+		write(modempipes[1], "G", 1);
+		pthread_mutex_unlock(&mpipemx);
+		pthread_mutex_lock(&modemmx);
+		write(modemfd, str, strlen(str) + 1);
+		pthread_cond_signal(&mpcond);
+		pthread_mutex_unlock(&modemmx);
+	} else {
+		pthread_mutex_lock(&modemmx);
+		write(modemfd, str, strlen(str) + 1);
+		pthread_mutex_lock(&modemmx);
+	}
 }
-void stmod(const char* str)
+void give_me_modem(str) /* warning: deprecated! */
+	char *str;
 {
-	pthread_mutex_lock(&modemmx);
-	fputs(str, modem);
-	fflush(modem);
-	pthread_mutex_unlock(&modemmx);
+	stmod(str);
 }
 int close_modem(char* dev)
 {
@@ -129,7 +135,7 @@ int init_modem(char* dev)
 		return -3;
 	}
 	pthread_mutex_unlock(&modemmx);
-	stmod(INITSTRING);
+	stmod(ROCKWELL_INITSTRING);
 	pthread_mutex_lock(&mpipemx);
 	pipe(modempipes);
 	pthread_mutex_unlock(&mpipemx);
@@ -190,10 +196,7 @@ void modem_hread(char* cbuf)
 }
 /*
  * XXX: this is inefficient
- * TODO: move this so we have a global pipe that is select()ed.
- * Threads lock its mutex, write ONE BYTE to it, and the select() receives it. The calling thread unlocks the pipe mux.
- * This unlocks the modem mutex, waits, and tries to keep locking (maybe using a conditional)
- * until it gets it and reselects. DO IT. (thanks jilles)
+ * Thanks jilles for the tip on the pipe method used below :)
  * Do all this after a trylock().
  */
 void *modem_io(k)
@@ -206,6 +209,7 @@ void *modem_io(k)
 	k = 0;
 	*cbuf = '\0'; cbuf[1] = '\0';
 	pthread_mutex_lock(&modemmx);
+	pthread_mutex_lock(&miomx);
 	for(;;) {
 		pthread_mutex_lock(&cfmx);
 	/*	dotm = cf.modem_tm; */
@@ -230,7 +234,9 @@ void *modem_io(k)
 				{
 					if(FD_ISSET(modemfd, &fds) != 0) {
 						read(modemfd, cbuf, 1);
+						pthread_mutex_unlock(&modemmx); /* so we can use the same functions for sep. threads */
 						modem_hread(cbuf);
+						pthread_mutex_lock(&modemmx);
 						*cbuf = '\0';
 					}
 					if(FD_ISSET(modempipes[0], &fds) != 0) {
@@ -240,7 +246,20 @@ void *modem_io(k)
 				}
 		}
 	}
+	pthread_mutex_unlock(&miomx);
 	pthread_mutex_unlock(&modemmx);
 	pthread_exit(NULL);
 	return 0;
+}
+/* Modem control stuff: be forewarned, this might become pluggable!
+ * Rockwell for now.
+ */
+void modem_pickup(void) 
+{
+	/* no locking because stmod() does it for us */
+	stmod(ROCKWELL_PICKUP);
+}
+void modem_hangup(void)
+{
+	stmod(ROCKWELL_HANGUP);
 }

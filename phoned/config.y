@@ -24,6 +24,7 @@ void yyerror(str)
 {
 	lprintf(fatal, "parser: error: %s at line %d chr %d (near %s)\n", str,
 	 lincnt, chrcnt, yytext);
+	shutd();
 	exit(-1);
 }
 int yywrap(void)

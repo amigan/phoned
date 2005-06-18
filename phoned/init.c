@@ -55,6 +55,8 @@ void initialize(void)
 	pthread_mutex_lock(&cfmx);
 	if(init_modem(cf.modemdev) != 1) {
 		lprintf(warn, "warning: modem didn't initialise properly; see previous messages\n");
+		shutd();
+		exit(-1);
 	}
 	pthread_mutex_unlock(&cfmx);
 }

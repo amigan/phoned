@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/cid.c,v 1.4 2005/06/18 20:40:15 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/cid.c,v 1.5 2005/06/18 20:51:29 dcp1990 Exp $ */
 /* system includes */
 #include <stdlib.h>
 #include <limits.h>
@@ -54,13 +54,12 @@ cid_t* parse_cid(char* cidstring)
 	char cbyte, cbyte2;
 	char bytebuf[10];
 	char date[7];
-	time_t rnow;
-	struct tm *ctm;
 	char cidtime[7];
 	char name[128];
 	char phone[128];
 	int cur = 0, sz, fbcou = 0;
 	short int finl = 0;
+	char *ct;
 	cid_t* c;
 	c = malloc(sizeof(cid_t));
 	memset(msg, 0, sizeof msg);
@@ -72,19 +71,18 @@ cid_t* parse_cid(char* cidstring)
 		cidstring[strlen(cidstring)] = 0;
 	sz = strlen(cidstring);
 	finl = (sz / 2) - 2;
-	rnow = time(NULL);
-	ctm = localtime(&rnow);
+	strcpy(bytebuf, "0x");
 	for(cur = 0; cur <= sz; cur++) {
 		cbyte = cidstring[cur++];
 		cbyte2 = cidstring[cur];
-		sprintf(bytebuf, "0x%c%c", cbyte, cbyte2);
-		sscanf(bytebuf, "%X", (int*)&cch);
+		bytebuf[2] = cbyte; bytebuf[3] = cbyte2;
+		cch = strtol(bytebuf, NULL, 16);
 		if(cch == 0) continue;
 		if(fbcou <= finl) {
 			finalbuf[fbcou] = cch;
 			fbcou++;
 		} else break;
-		memset(bytebuf, 0, sizeof(bytebuf));
+		/* perche? memset(bytebuf, 0, sizeof(bytebuf)); */
 		cbyte = 0;
 		cbyte2 = 0;
 	}
@@ -158,7 +156,11 @@ cid_t* parse_cid(char* cidstring)
 #endif
 	c->name = strdup(name);
 	c->number = strdup(phone);
-	sscanf(cidtime, "%d:%d", (int*)&c->hour, (int*)&c->minute);
+	ct = strchr(cidtime, ':');
+	if(ct != NULL) *ct = '\0';
+	c->hour = strtol(cidtime, NULL, 10);
+	c->minute = strtol(ct + 1, NULL, 10);
+	*ct = ':';
 	date[2] = 0x0;
 	c->month = strtol(date, NULL, 10);
 	c->day = strtol(date + 3, NULL, 10);

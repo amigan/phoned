@@ -45,7 +45,6 @@ int check_loglevel(lt, ll)
 		default:
 			return 1;
 	}
-	return 1;
 }
 
 

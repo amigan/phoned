@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/notify.c,v 1.3 2005/06/12 22:25:55 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/notify.c,v 1.4 2005/06/18 21:47:16 dcp1990 Exp $ */
 #include <fcntl.h>
 #include <ctype.h>
 #include <unistd.h>
@@ -87,7 +87,7 @@ int cid_notify(cid_t* c)
 	char* msg;
 	int s;
 	struct sockaddr_in sin;
-	int on = 0x1;
+	char on = 0x1;
 	addrsll_t *cur;
 	len = strlen(c->number) + strlen(c->name) + 8 + 5 + 4;
 	msg = malloc(len * sizeof(char));
@@ -97,7 +97,7 @@ int cid_notify(cid_t* c)
 	bzero(&sin, sizeof(sin));
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(3890);
-	if(setsockopt(s, SOL_SOCKET, SO_BROADCAST, (char*)&on, sizeof(on)) < 0) {
+	if(setsockopt(s, SOL_SOCKET, SO_BROADCAST, &on, sizeof(on)) < 0) {
 		lprintf(error, "setsockopt: %s\n", strerror(errno));
 		return -1;
 	}

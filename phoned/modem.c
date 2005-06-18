@@ -187,7 +187,7 @@ void *modem_io(k)
 	/* struct timeval tv; 
 	short dotm = 0; */
 	char	cbuf[2];
-	k = 0;
+	if(k == 0) ;
 	*cbuf = '\0'; cbuf[1] = '\0';
 	pthread_mutex_lock(&modemmx);
 	pthread_mutex_lock(&miomx);
@@ -227,6 +227,7 @@ void *modem_io(k)
 				}
 		}
 	}
+	/* NOTREACHED */
 	pthread_mutex_unlock(&miomx);
 	pthread_mutex_unlock(&modemmx);
 	pthread_exit(NULL);

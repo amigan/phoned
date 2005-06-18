@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/db.c,v 1.1 2005/06/18 20:23:45 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/db.c,v 1.2 2005/06/18 21:47:16 dcp1990 Exp $ */
 #include <stdio.h>
 #include <string.h>
 #include <pthread.h>
@@ -57,7 +57,7 @@ short db_check_for_table(tablename, dbh) /* needs to be locked before use!!!!!!!
 	}
 	while((rc = sqlite3_step(cst)) == SQLITE_ROW) {
 		result = sqlite3_column_text(cst, 0);
-		if(strcmp(result, tablename) == 0) {
+		if(strcmp((const char *)result, tablename) == 0) {
 			sqlite3_finalize(cst);
 			return 1;
 		}

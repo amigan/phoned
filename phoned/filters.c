@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/filters.c,v 1.10 2005/06/16 21:05:00 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/filters.c,v 1.11 2005/06/18 21:47:16 dcp1990 Exp $ */
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -46,9 +46,13 @@ void free_cond_elms(cond)
 	if(cond->namerx.prex != NULL) free(cond->namerx.prex);
 	if(cond->numbrx.prex != NULL) free(cond->numbrx.prex);
 }
+#ifdef lint
+void free_condition(cond_t* h, short traverse)
+#else
 void free_condition(h, traverse)
 	cond_t* h;
 	short traverse;
+#endif
 {
 	cond_t *ls, *c, *tp;
 	tp = h;

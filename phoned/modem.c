@@ -81,7 +81,7 @@ void stmod(str)
 	} else {
 		pthread_mutex_lock(&modemmx);
 		write(modemfd, str, strlen(str) + 1);
-		pthread_mutex_lock(&modemmx);
+		pthread_mutex_unlock(&modemmx);
 	}
 }
 void give_me_modem(str) /* warning: deprecated! */

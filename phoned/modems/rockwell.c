@@ -27,16 +27,18 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/modems/rockwell.c,v 1.1 2005/06/18 03:10:56 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/modems/rockwell.c,v 1.2 2005/06/18 20:37:04 dcp1990 Exp $ */
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <limits.h>
 #include <pthread.h>
 #include <phoned.h>
 #define ROCKWELL_INITSTRING	"ATZ\r\nAT E0 #CID=2 V0\r\n"
 #define ROCKWELL_PICKUP		"ATH1\r\n"
 #define ROCKWELL_HANGUP		"ATH\r\n"
 #define ROCKWELL_RESET		"ATZ\r\n"
-
+/* LINTLIBRARY */ /* PROTOLIB1 */
 short plug_init(void)
 {
 	return 1; /* ok */
@@ -60,7 +62,7 @@ mod_res_t rw_evalrc(result)
 	for(i = 0; i <= strlen(result); i++) {
 		if(result[i] == '\r' || result[i] == '\n') result[i] = '\0';
 	}
-	rescode = atoi(result);
+	rescode = (int)strtol(result, NULL, 0);
 	switch(rescode) {
 		case 0:
 			/* OK */

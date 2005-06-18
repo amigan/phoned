@@ -45,6 +45,7 @@
 #include <sys/types.h>
 #include <errno.h>
 #include <pthread.h>
+#define MODEM_C
 #include <phoned.h>
 #define ROCKWELL_INITSTRING	"ATZ\r\nAT E0 #CID=2 V0\r\n"
 #define ROCKWELL_PICKUP		"ATH1\r\n"
@@ -64,6 +65,8 @@ pthread_mutex_t buffermx = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t mpcond = PTHREAD_COND_INITIALIZER;
 int modempipes[2];
 extern pthread_mutex_t cfmx;
+modem_t* mo;
+extern modem_t rockwell;
 void stmod(str)
 	const char* str;
 {
@@ -135,36 +138,14 @@ int init_modem(char* dev)
 		return -3;
 	}
 	pthread_mutex_unlock(&modemmx);
-	stmod(ROCKWELL_INITSTRING);
+	mo = &rockwell;
+	mo->init();
 	pthread_mutex_lock(&mpipemx);
 	pipe(modempipes);
 	pthread_mutex_unlock(&mpipemx);
 	return 1;
 }
-int modem_evalrc(char* result)
-{
-	int rescode;
-	unsigned int i;
-	for(i = 0; i <= strlen(result); i++) {
-		if(result[i] == '\r' || result[i] == '\n') result[i] = '\0';
-	}
-	rescode = atoi(result);
-	switch(rescode) {
-		case 0:
-			/* OK */
-			return 0;
-			break;
-		case 2:
-			break;
-		case 4:
-			return -1;
-			break;
-		default:
-			return 0;
-			break;
-	}
-	return 0;
-}
+
 void modem_hread(char* cbuf)
 {
 	pthread_mutex_lock(&buffermx);
@@ -251,6 +232,7 @@ void *modem_io(k)
 	pthread_exit(NULL);
 	return 0;
 }
+#if 0 /* all old... */
 /* Modem control stuff: be forewarned, this might become pluggable!
  * Rockwell for now.
  */
@@ -263,3 +245,28 @@ void modem_hangup(void)
 {
 	stmod(ROCKWELL_HANGUP);
 }
+int modem_evalrc(char* result)
+{
+	int rescode;
+	unsigned int i;
+	for(i = 0; i <= strlen(result); i++) {
+		if(result[i] == '\r' || result[i] == '\n') result[i] = '\0';
+	}
+	rescode = atoi(result);
+	switch(rescode) {
+		case 0:
+			/* OK */
+			return 0;
+			break;
+		case 2:
+			break;
+		case 4:
+			return -1;
+			break;
+		default:
+			return 0;
+			break;
+	}
+	return 0;
+}
+#endif

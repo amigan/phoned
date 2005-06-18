@@ -3,7 +3,7 @@
  * (C)2005, Dan Ponte
  * BSDL w/ advert.
  */
-/* $Amigan: phoned/include/phoned.h,v 1.13 2005/06/16 21:04:58 dcp1990 Exp $ */
+/* $Amigan: phoned/include/phoned.h,v 1.14 2005/06/18 03:10:45 dcp1990 Exp $ */
 #include <pcre.h> /* fugly, I know... */
 #define VERSION "0.1"
 #define LOGFILE "/var/log/phoned.log"
@@ -97,6 +97,22 @@ typedef struct cnd_t {
 	struct cnd_t* last;
 	struct cnd_t* next;
 } cond_t;
+typedef enum modes_t {
+	ok,
+	ring,
+	incoming,
+	err
+} mod_res_t;
+typedef struct mod_t {
+	char*		modem_name;
+	int		features;
+	int		deffuncs;
+	int		(*init)(void);
+	int		(*destroy)(void);
+	mod_res_t	(*evalrc)(char *result);
+	void		(*pickup)(void);
+	void		(*hangup)(void);
+} modem_t;	
 typedef enum stat {
 	init = 0,
 	loginstage,
@@ -146,5 +162,14 @@ void *modem_io(void *k);
 void give_me_modem(char* str);
 char *parse_command(const char *cmd, short *cont, state_info_t *s);
 void begin_dialogue(FILE* fp, int fd);
+/* old stuff...
 void modem_pickup(void);
 void modem_hangup(void);
+*/
+/* function defs for modem... */
+#define modem_pickup	mo->pickup
+#define modem_hangup	mo->hangup
+#define modem_evalrc	mo->evalrc
+#ifndef MODEM_C
+extern modem_t *mo;
+#endif

@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/modems/rockwell.c,v 1.2 2005/06/18 20:37:04 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/modems/rockwell.c,v 1.3 2005/06/18 20:38:15 dcp1990 Exp $ */
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -62,7 +62,7 @@ mod_res_t rw_evalrc(result)
 	for(i = 0; i <= strlen(result); i++) {
 		if(result[i] == '\r' || result[i] == '\n') result[i] = '\0';
 	}
-	rescode = (int)strtol(result, NULL, 0);
+	rescode = (int)strtol(result, NULL, 10);
 	switch(rescode) {
 		case 0:
 			/* OK */

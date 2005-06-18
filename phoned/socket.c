@@ -71,8 +71,8 @@ void *network(b)
 	pthread_t	thr;
 	char		cbuf[1];
 	void*		 is;
-	cbuf[0] = '\0'; cbuf[1] = '\0';
 	struct sockaddr_un it;
+	cbuf[0] = '\0'; cbuf[1] = '\0';
 	is = b;
 	if((s = socket(AF_LOCAL, SOCK_STREAM, 0)) == -1) {
 		perror("socket");

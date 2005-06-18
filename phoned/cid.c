@@ -27,9 +27,10 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/cid.c,v 1.3 2005/06/13 01:13:30 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/cid.c,v 1.4 2005/06/18 20:40:15 dcp1990 Exp $ */
 /* system includes */
 #include <stdlib.h>
+#include <limits.h>
 #include <unistd.h>
 #include <string.h>
 #include <time.h>
@@ -159,8 +160,8 @@ cid_t* parse_cid(char* cidstring)
 	c->number = strdup(phone);
 	sscanf(cidtime, "%d:%d", (int*)&c->hour, (int*)&c->minute);
 	date[2] = 0x0;
-	c->month = atoi(date);
-	c->day = atoi(date + 3);
+	c->month = strtol(date, NULL, 10);
+	c->day = strtol(date + 3, NULL, 10);
 	date[2] = '/';
 	return c;
 }

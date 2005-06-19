@@ -17,6 +17,9 @@ extern pthread_mutex_t logfmx;
 extern struct conf	cf;
 extern pthread_mutex_t cfmx;
 extern cond_t* topcond;
+extern pthread_t networkth, modemth;
+extern pthread_cond_t maincond;
+
 #define WD_LOGS		0x1
 #define WD_HANDLERS	0x2
 #define WD_CONFIG	0x4
@@ -26,19 +29,17 @@ extern cond_t* topcond;
 void shutd(whatdone)
 	int whatdone;
 {
-	lprintf(fatal, "phoned shutting down...\n");
-	pthread_mutex_lock(&cfmx);
-	lprintf(info, "got cf lock");
-	if(whatdone & WD_MODEM) close_modem(cf.modemdev);
-	pthread_mutex_unlock(&cfmx);
+	lprintf(fatal, "phoned shutting down (th %s)...\n", pthread_equal(pthread_self(), networkth) ? "network" : (pthread_equal(pthread_self(), modemth) ? "modem" : "other/main"));
+	awaken_sel();
+	unlink(SOCKETFILE);
+	if(whatdone & WD_MODEM) modem_wake();
 	flush_lists();
 	free_condition(topcond, 0x1);
-	pthread_mutex_lock(&logfmx);
-	pthread_mutex_unlock(&logfmx);
 	if(whatdone & WD_DBINIT) db_destroy();
-	lprintf(info, "got log lock");
+	pthread_mutex_lock(&logfmx);
 	if(whatdone & WD_LOGS) fclose(logf);
-	unlink(SOCKETFILE);
+	pthread_mutex_unlock(&logfmx);
+	pthread_cond_signal(&maincond);
 }
 
 int open_logs(void)

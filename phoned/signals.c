@@ -39,7 +39,6 @@ void handsig(sig)
 	int sig;
 {
 	if(pthread_equal(pthread_self(), networkth)) {
-		lprintf(info, "siamo spesa");
 		return;
 	}
 	signal(sig, handsig);
@@ -47,11 +46,8 @@ void handsig(sig)
 		case SIGINT:
 		case SIGTERM:
 			lprintf(fatal, "Received signal %d, cleaning up...\n", sig);
-			awaken_sel();
-			lprintf(info, "woke up sel");
-			modem_wake();
-			lprintf(info, "woke up mod");
 			shutd(0x1 | 0x2 | 0x4 | 0x10 | 0x20);
+			lprintf(info, "returned from shutd()");
 			exit(0);
 			break;
 		case SIGHUP:
@@ -68,4 +64,10 @@ void install_handlers(void)
 	signal(SIGQUIT, handsig);
 	signal(SIGHUP, handsig);
 	signal(SIGTERM, handsig);
+}
+void fillset(void)
+{
+	sigset_t sset;
+	sigfillset(&sset);
+	pthread_sigmask(SIG_BLOCK, &sset, NULL);
 }

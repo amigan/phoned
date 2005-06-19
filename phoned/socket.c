@@ -60,9 +60,7 @@ void *handclient(k)
 	tf = fdopen(sk, "r+");
 	begin_dialogue(tf, sk);
 	fclose(tf);
-	lprintf(info, "here");
 	pthread_exit(NULL);
-	lprintf(info, "there");
 	return 0;
 }
 #if 0
@@ -88,6 +86,7 @@ void *network(b)
 	pthread_t	thr;
 	char		cbuf[2];
 	struct sockaddr_un it;
+	fillset();
 	cbuf[0] = '\0'; cbuf[1] = '\0';
 	if(b == 0) b = 0;
 	if((s = socket(AF_LOCAL, SOCK_STREAM, 0)) == -1) {
@@ -117,10 +116,8 @@ void *network(b)
 		FD_SET(selpipes[0], &fds);
 		switch(select(selpipes[0] + 1, &fds, NULL, NULL, NULL)) { /* this had better be a cancellation point... */
 		case -1:
-			lprintf(error, "select: %s\n", strerror(errno));
+			lprintf(error, "network select: %s\n", strerror(errno));
 			pthread_exit(NULL);
-			return (void*)0;
-			lprintf(error, "selet: \n");
 			break;
 		case 0:
 			/* NOTREACHED */
@@ -138,20 +135,16 @@ void *network(b)
 						exit(-3);
 					}
 					pthread_create(&thr, NULL, handclient, (void*)sn);
-					lprintf(info, "Incoming connection\n"
-							,ilen);
-						
+					lprintf(info, "Incoming connection\n");
 				}
 				if(FD_ISSET(selpipes[0], &fds) != 0) {
-					char tbuf[2];
-					lprintf(info, "woken\n");
-					read(selpipes[0], tbuf, 1);
-					break;
+					read(selpipes[0], cbuf, 1);
+					pthread_exit(NULL);
 				}
 			}
 		}
+		if(*cbuf != 0) break;
 	}
-	lprintf(info, "still alive!");
 	close(s);
 	unlink(SOCKETFILE);
 	pthread_exit(NULL);

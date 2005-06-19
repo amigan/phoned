@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/notify.c,v 1.6 2005/06/19 02:47:45 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/notify.c,v 1.7 2005/06/19 04:46:15 dcp1990 Exp $ */
 #include <fcntl.h>
 #include <ctype.h>
 #include <unistd.h>
@@ -79,6 +79,7 @@ void flush_lists(void)
 {
 	pthread_mutex_lock(&addrmx);
 	freeaddrl(top);
+	top = 0;
 	pthread_mutex_unlock(&addrmx);
 }
 int cid_notify(cid_t* c)

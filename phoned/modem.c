@@ -70,7 +70,7 @@ extern modem_t rockwell;
 void stmod(str)
 	const char* str;
 {
-	if(pthread_mutex_trylock(&modemmx) != 0 && pthread_mutex_trylock(&miomx) == 0) {
+	if(pthread_mutex_trylock(&modemmx) != 0 && pthread_mutex_trylock(&miomx) != 0) {
 		pthread_mutex_lock(&mpipemx);
 		write(modempipes[1], "G", 1);
 		pthread_mutex_unlock(&mpipemx);
@@ -86,9 +86,15 @@ void stmod(str)
 }
 void modem_wake(void)
 {
-	pthread_mutex_lock(&mpipemx);
-	write(modempipes[1], "D", 1);
-	pthread_mutex_unlock(&mpipemx);
+	if(pthread_mutex_trylock(&miomx) != 0) {
+		pthread_mutex_lock(&mpipemx);
+		write(modempipes[1], "D", 1);
+		pthread_mutex_unlock(&mpipemx);
+	} else {
+		pthread_mutex_lock(&cfmx);
+		close_modem(cf.modemdev);
+		pthread_mutex_unlock(&cfmx);
+	}
 }
 void give_me_modem(str) /* warning: deprecated! */
 	char *str;
@@ -193,6 +199,7 @@ void *modem_io(k)
 	char	cbuf[2];
 	if(k == 0) k = 0;
 	*cbuf = '\0'; cbuf[1] = '\0';
+	fillset();
 	pthread_mutex_lock(&modemmx);
 	pthread_mutex_lock(&miomx);
 	for(;;) {
@@ -227,11 +234,18 @@ void *modem_io(k)
 					if(FD_ISSET(modempipes[0], &fds) != 0) {
 						read(modempipes[0], cbuf, 1);
 						if(*cbuf == 'G') pthread_cond_wait(&mpcond, &modemmx); else {
+							pthread_mutex_unlock(&miomx);
+							pthread_mutex_unlock(&modemmx);
+							pthread_mutex_lock(&cfmx);
+							close_modem(cf.modemdev);
+							pthread_mutex_unlock(&cfmx);
+							pthread_exit(NULL);
 							break;
 						}
 					}
 				}
 		}
+		if(*cbuf == 'D') break;
 	}
 	/* NOTREACHED */
 	pthread_mutex_unlock(&miomx);

@@ -44,7 +44,7 @@ modemdev		return MODDEV;
 \{			return OBRACE;
 \}			return CBRACE;
 \/[^\n]+\/	yylval.string = strdup(yytext); return REGEX;
-\/[a-zA-Z0-9/._-]+		yylval.string = strdup(yytext); return PATH;
+[./][a-zA-Z0-9/._-]+		yylval.string = strdup(yytext); return PATH;
 [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}	yylval.string = strdup(yytext); return IPADDR;
 [a-zA-Z0-9_-]+		yylval.string = strdup(yytext); return FNAME;
 ;			return SCOLON;

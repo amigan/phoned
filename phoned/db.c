@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/db.c,v 1.2 2005/06/18 21:47:16 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/db.c,v 1.3 2005/06/19 00:10:51 dcp1990 Exp $ */
 #include <stdio.h>
 #include <string.h>
 #include <pthread.h>
@@ -131,4 +131,10 @@ short db_init(dbfilename)
 	return 1;
 }
 
-
+short db_destroy(void)
+{
+	pthread_mutex_lock(&dbmx);
+	sqlite3_close(db);
+	pthread_mutex_unlock(&dbmx);
+	return 1;
+}

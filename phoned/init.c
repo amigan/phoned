@@ -35,6 +35,7 @@ void shutd(whatdone)
 	pthread_mutex_lock(&logfmx);
 	if(whatdone & WD_LOGS) fclose(logf);
 	pthread_mutex_unlock(&logfmx);
+	if(whatdone & WD_DBINIT) db_destroy();
 	unlink(SOCKETFILE);
 }
 

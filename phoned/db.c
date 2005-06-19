@@ -27,11 +27,13 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/db.c,v 1.3 2005/06/19 00:10:51 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/db.c,v 1.4 2005/06/19 01:17:55 dcp1990 Exp $ */
 #include <stdio.h>
 #include <string.h>
 #include <pthread.h>
+#include <time.h>
 /* sqlite 3 */
+/* LONGLONG */
 #include <sqlite3.h>
 
 #include <phoned.h>
@@ -75,7 +77,7 @@ short db_create_calls_table(dbh)
 	int rc;
 	char *emsg;
 	const char* const sql = 
-		"CREATE TABLE " CALLS_TABLE " (id INTEGER PRIMARY KEY, dtime INTEGER, number TEXT, name TEXT, ciddate TEXT, cidtime TEXT)";
+		"CREATE TABLE " CALLS_TABLE " (id INTEGER PRIMARY KEY, dtime INTEGER, number TEXT, name TEXT, cidmon INTEGER, cidday INTEGER, cidhour INTEGER, cidmin INTEGER)";
 	rc = sqlite3_exec(dbh, sql, NULL, NULL, &emsg);
 	if(rc != SQLITE_OK) {
 		lprintf(error, "db_create_calls_table(0x%p): error: %s\n", dbh, emsg);
@@ -136,5 +138,28 @@ short db_destroy(void)
 	pthread_mutex_lock(&dbmx);
 	sqlite3_close(db);
 	pthread_mutex_unlock(&dbmx);
+	return 1;
+}
+
+/* stuff that does stuff */
+
+short db_add_call(c, t)
+	cid_t *c;
+	time_t t;
+{
+	int rc;
+	char *emsg;
+	char *sql;
+	pthread_mutex_lock(&dbmx);
+	sql = sqlite3_mprintf("INSERT INTO " CALLS_TABLE " VALUES(null, %d, '%q', '%q', %d, %d, %d, %d)",
+			t, c->name, c->number, c->month, c->day, c->hour, c->minute);
+	if((rc = sqlite3_exec(db, sql, NULL, 0x0, &emsg)) != SQLITE_OK) {
+		lprintf(error, "Error adding call to db: %s\n", emsg);
+		sqlite3_free(emsg);
+		sqlite3_free(sql);
+		return 0;
+	}
+	sqlite3_free(sql);
+	pthread_mutex_lock(&dbmx);
 	return 1;
 }

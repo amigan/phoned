@@ -12,7 +12,6 @@
 
 #include <phoned.h>
 extern struct conf cf;
-short	difflog = 0;
 extern pthread_mutex_t cfmx;
 extern pthread_t networkth;
 extern pthread_t modemth;
@@ -29,6 +28,8 @@ int main(argc, argv)
 	int c;
 	pthread_mutex_lock(&cfmx);
 	cf.cfile = CONFIGFILE;
+	cf.dbfile = DBFILE;
+	cf.logfile = LOGFILE;
 #define OPTSTRING "dhc:l:"
 	while((c = getopt(argc, argv, OPTSTRING)) != -1)
 		switch(c) {
@@ -40,7 +41,6 @@ int main(argc, argv)
 				return 0;
 			case 'l':
 				cf.logfile = strdup(optarg);
-				difflog = 1;
 				break;
 			case 'd':
 				daemon(1, 0);

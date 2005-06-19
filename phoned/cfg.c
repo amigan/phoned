@@ -2,7 +2,7 @@
  * FUCK....lex overwrote this :-(
  * (C)2005, Dan Ponte...again.
  */
-/* $Amigan: phoned/phoned/cfg.c,v 1.5 2005/06/12 23:05:12 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/cfg.c,v 1.6 2005/06/19 00:04:06 dcp1990 Exp $ */
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
@@ -14,22 +14,28 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <stdlib.h>
+#include <errno.h>
 extern addrsll_t *top;
 struct conf	cf;
 extern pthread_mutex_t	addrmx;
 pthread_mutex_t	cfmx;
-void read_config(void)
+short read_config(void)
 {
 	FILE* con;
 	pthread_mutex_lock(&cfmx);
 	con = fopen(cf.cfile, "r");
 	pthread_mutex_unlock(&cfmx);
 	if(!con) {
-		perror("error opening config file");
-		exit(-1);
+		lprintf(error, "error opening config file: %s\n", strerror(errno));
+		return 0;
 	}
-	parse(&con);
+	if(parse(&con) == -1) {
+		lprintf(error, "error parsing\n");
+		fclose(con);
+		return 0;
+	}
 	fclose(con);
+	return 1;
 }
 void addtoaddrs(const char* par)
 {

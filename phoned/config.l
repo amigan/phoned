@@ -17,6 +17,7 @@ extern pthread_mutex_t cfmx;
 .			++chrcnt; REJECT;
 main			return MAIN;
 loglevel		pthread_mutex_lock(&cfmx); cf.loglevels = LL_CRITICAL|LL_FATAL; pthread_mutex_unlock(&cfmx); return LLEVEL;
+database		return DB;
 all			yylval.number = LL_ALL; return LNUML;
 debug			yylval.number = LL_DEBUG; return LNUML;
 info			yylval.number = LL_INFO; return LNUML;

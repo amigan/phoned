@@ -24,7 +24,7 @@ void yyerror(str)
 {
 	lprintf(fatal, "parser: error: %s at line %d chr %d (near %s)\n", str,
 	 lincnt, chrcnt, yytext);
-	shutd();
+	shutd(0x1 | 0x2);
 	exit(-1);
 }
 int yywrap(void)
@@ -33,7 +33,7 @@ int yywrap(void)
 }
 %}
 %token NOTIFY OBRACE CBRACE SCOLON QUOTE MODDEV MAIN LLEVEL OR
-%token FILTERS ACTION NAME PHNUM FILTER FLAGS
+%token FILTERS ACTION NAME PHNUM FILTER FLAGS DB
  /* HANGUP IGNOREIT PLAY RECORD */
 %token <number> LNUML ACTN FLAG
 %token <string> IPADDR PATH REGEX FNAME
@@ -63,6 +63,8 @@ directive:
 	modemdev
 	|
 	loglevel
+	|
+	database
 	;
 notify:
 	NOTIFY iplist
@@ -79,6 +81,18 @@ ipadr:
 	{
 		lprintf(debug, "Encountered ipaddress %s\n", $1);
 		addtoaddrs($1);
+	}
+	;
+database:
+	DB dbpath
+	;
+dbpath:
+	QUOTE PATH QUOTE
+	{
+		lprintf(debug, "Database path == %s\n", $2);
+		pthread_mutex_lock(&cfmx);
+		cf.dbfile = $2;
+		pthread_mutex_unlock(&cfmx);
 	}
 	;
 modemdev:

@@ -3,12 +3,13 @@
  * (C)2005, Dan Ponte
  * BSDL w/ advert.
  */
-/* $Amigan: phoned/include/phoned.h,v 1.15 2005/06/18 20:13:05 dcp1990 Exp $ */
+/* $Amigan: phoned/include/phoned.h,v 1.16 2005/06/19 00:04:02 dcp1990 Exp $ */
 #include <pcre.h> /* fugly, I know... */
 #define VERSION "0.1"
 #define LOGFILE "/var/log/phoned.log"
 #define SOCKETFILE "/tmp/phoned.sock"
 #define CONFIGFILE "phoned.conf"
+#define DBFILE	"phoned.sqlite"
 #define _unused       __attribute__((__unused__))
 struct conf {
 	char* cfile;
@@ -16,6 +17,7 @@ struct conf {
 	int loglevels;
 	short modem_tm;
 	char* modemdev;
+	char *dbfile;
 };
 #define LL_DEBUG	0x1
 #define	LL_GARBAGE	0x2
@@ -137,8 +139,8 @@ void freeaddrl(addrsll_t* hd);
 /* function prottypes */
 void initialize(void);
 void open_log(void);
-void read_config(void);
-void shutd(void);
+short read_config(void);
+void shutd(int whatdone);
 void *network(void *b);
 int lprintf(enum ltype logtype, const char* fmt, ...);
 void handsig(int sig);

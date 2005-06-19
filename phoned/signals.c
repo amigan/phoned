@@ -43,7 +43,7 @@ void handsig(sig)
 		case SIGQUIT:
 		case SIGTERM:
 			lprintf(fatal, "Received signal %d, cleaning up...\n", sig);
-			shutd();
+			shutd(0x1 | 0x2 | 0x4 | 0x10 | 0x20);
 			exit(0);
 			break;
 		case SIGHUP:

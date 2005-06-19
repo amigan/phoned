@@ -32,17 +32,25 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <unistd.h>
+#include <pthread.h>
 #include <phoned.h>
-
+extern pthread_t networkth;
 void handsig(sig)
 	int sig;
 {
+	if(pthread_equal(pthread_self(), networkth)) {
+		lprintf(info, "siamo spesa");
+		return;
+	}
 	signal(sig, handsig);
 	switch(sig) {
 		case SIGINT:
-		case SIGQUIT:
 		case SIGTERM:
 			lprintf(fatal, "Received signal %d, cleaning up...\n", sig);
+			awaken_sel();
+			lprintf(info, "woke up sel");
+			modem_wake();
+			lprintf(info, "woke up mod");
 			shutd(0x1 | 0x2 | 0x4 | 0x10 | 0x20);
 			exit(0);
 			break;

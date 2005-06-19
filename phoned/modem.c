@@ -84,6 +84,12 @@ void stmod(str)
 		pthread_mutex_unlock(&modemmx);
 	}
 }
+void modem_wake(void)
+{
+	pthread_mutex_lock(&mpipemx);
+	write(modempipes[1], "D", 1);
+	pthread_mutex_unlock(&mpipemx);
+}
 void give_me_modem(str) /* warning: deprecated! */
 	char *str;
 {
@@ -220,7 +226,9 @@ void *modem_io(k)
 					}
 					if(FD_ISSET(modempipes[0], &fds) != 0) {
 						read(modempipes[0], cbuf, 1);
-						pthread_cond_wait(&mpcond, &modemmx);
+						if(*cbuf == 'G') pthread_cond_wait(&mpcond, &modemmx); else {
+							break;
+						}
 					}
 				}
 		}

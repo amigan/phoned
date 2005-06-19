@@ -50,6 +50,8 @@
 extern pthread_mutex_t modemmx;
 extern pthread_mutex_t buffermx;
 pthread_t networkth;
+int selpipes[2];
+pthread_mutex_t spipsmx;
 void *handclient(k)
 	void*	k;
 {
@@ -58,10 +60,25 @@ void *handclient(k)
 	tf = fdopen(sk, "r+");
 	begin_dialogue(tf, sk);
 	fclose(tf);
+	lprintf(info, "here");
 	pthread_exit(NULL);
+	lprintf(info, "there");
 	return 0;
 }
-
+#if 0
+void clsck(sck)
+	void *sck;
+{
+	int s = (int)sck;
+	close(s);
+}
+#endif
+void awaken_sel(void)
+{
+	pthread_mutex_lock(&spipsmx);
+	write(selpipes[1], "W", 1);
+	pthread_mutex_unlock(&spipsmx);
+}
 void *network(b)
 	void* b;
 {
@@ -78,6 +95,9 @@ void *network(b)
 		shutd(0x1|0x2|0x4|0x10|0x20);
 		exit(-1);
 	}
+	pthread_mutex_lock(&spipsmx);
+	pipe(selpipes);
+	pthread_mutex_unlock(&spipsmx);
 	strcpy(it.sun_path, SOCKETFILE);
 	it.sun_family = AF_LOCAL;
 	if(bind(s, (struct sockaddr *)&it, 1 + strlen(it.sun_path) +
@@ -94,11 +114,13 @@ void *network(b)
 	for(;;) {
 		FD_ZERO(&fds);
 		FD_SET(s, &fds);
-		switch(select(s + 1, &fds, NULL, NULL, NULL)) {
+		FD_SET(selpipes[0], &fds);
+		switch(select(selpipes[0] + 1, &fds, NULL, NULL, NULL)) { /* this had better be a cancellation point... */
 		case -1:
 			lprintf(error, "select: %s\n", strerror(errno));
-			shutd(0x1|0x2|0x4|0x10|0x20);
-			exit(-1);
+			pthread_exit(NULL);
+			return (void*)0;
+			lprintf(error, "selet: \n");
 			break;
 		case 0:
 			/* NOTREACHED */
@@ -120,10 +142,17 @@ void *network(b)
 							,ilen);
 						
 				}
+				if(FD_ISSET(selpipes[0], &fds) != 0) {
+					char tbuf[2];
+					lprintf(info, "woken\n");
+					read(selpipes[0], tbuf, 1);
+					break;
+				}
 			}
 		}
 	}
-	/* NOTREACHED */
+	lprintf(info, "still alive!");
 	close(s);
 	unlink(SOCKETFILE);
+	pthread_exit(NULL);
 }

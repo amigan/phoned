@@ -28,14 +28,16 @@ void shutd(whatdone)
 {
 	lprintf(fatal, "phoned shutting down...\n");
 	pthread_mutex_lock(&cfmx);
+	lprintf(info, "got cf lock");
 	if(whatdone & WD_MODEM) close_modem(cf.modemdev);
 	pthread_mutex_unlock(&cfmx);
 	flush_lists();
 	free_condition(topcond, 0x1);
 	pthread_mutex_lock(&logfmx);
-	if(whatdone & WD_LOGS) fclose(logf);
 	pthread_mutex_unlock(&logfmx);
 	if(whatdone & WD_DBINIT) db_destroy();
+	lprintf(info, "got log lock");
+	if(whatdone & WD_LOGS) fclose(logf);
 	unlink(SOCKETFILE);
 }
 

@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/notify.c,v 1.5 2005/06/19 01:35:50 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/notify.c,v 1.6 2005/06/19 02:47:45 dcp1990 Exp $ */
 #include <fcntl.h>
 #include <ctype.h>
 #include <unistd.h>
@@ -87,7 +87,7 @@ int cid_notify(cid_t* c)
 	char* msg;
 	int s;
 	struct sockaddr_in sin;
-	char on = 0x1;
+	int on = 0x1;
 	addrsll_t *cur;
 	len = strlen(c->number) + strlen(c->name) + 8 + 5 + 4;
 	msg = malloc(len * sizeof(char));

@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 #include <phoned.h>
 #include <pthread.h>
 int chrcnt = 0;

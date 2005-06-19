@@ -1,4 +1,4 @@
-$Amigan: phoned/README,v 1.4 2005/06/14 02:45:36 dcp1990 Exp $
+$Amigan: phoned/README,v 1.5 2005/06/19 05:51:07 dcp1990 Exp $
 +=======================================+
 |		phoned			|
 |	(C)2005, Dan Ponte		|
@@ -27,7 +27,11 @@ include/ - global include files
 lib/ - API libraries
 phonectl/ - command line client to phoned
 phoned/ - main phone daemon written in C
+scripts/ - various administration and cool scripts
 xfone/ - Tcl/Tk interface to phoned
+
+The scripts need tcllib. Please modify the paths in the scripts to libraries
+so that they work.
 
 dcp1990@neptune.atopia.net - http://www.theamigan.net/phoned/index.html
 vim:tw=76

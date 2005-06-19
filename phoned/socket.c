@@ -75,18 +75,21 @@ void *network(b)
 	cbuf[0] = '\0'; cbuf[1] = '\0';
 	is = b;
 	if((s = socket(AF_LOCAL, SOCK_STREAM, 0)) == -1) {
-		perror("socket");
+		lprintf(error, "socket: %s\n", strerror(errno));
+		shutd(0x1|0x2|0x4|0x10|0x20);
 		exit(-1);
 	}
 	strcpy(it.sun_path, SOCKETFILE);
 	it.sun_family = AF_LOCAL;
 	if(bind(s, (struct sockaddr *)&it, 1 + strlen(it.sun_path) +
 					sizeof(it.sun_family)) == -1) {
-		perror("bind");
+		lprintf(error, "bind: %s\n", strerror(errno));
+		shutd(0x1|0x2|0x4|0x10|0x20);
 		exit(-1);
 	}
 	if(listen(s, 5) == -1) {
-		perror("listen");
+		lprintf(error, "listen: %s\n", strerror(errno));
+		shutd(0x1|0x2|0x4|0x10|0x20);
 		exit(-1);
 	}
 	sin_size = sizeof(struct sockaddr_in);
@@ -95,7 +98,8 @@ void *network(b)
 		FD_SET(s, &fds);
 		switch(select(s + 1, &fds, NULL, NULL, NULL)) {
 		case -1:
-			perror("select");
+			lprintf(error, "select: %s\n", strerror(errno));
+			shutd(0x1|0x2|0x4|0x10|0x20);
 			exit(-1);
 			break;
 		case 0:
@@ -110,6 +114,7 @@ void *network(b)
 							== -1) {
 						lprintf(error, "accept: %s\n",
 								strerror(errno));
+						shutd(0x1|0x2|0x4|0x10|0x20);
 						exit(-3);
 					}
 					pthread_create(&thr, NULL, handclient, (void*)sn);

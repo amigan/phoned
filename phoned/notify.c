@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/notify.c,v 1.4 2005/06/18 21:47:16 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/notify.c,v 1.5 2005/06/19 01:35:50 dcp1990 Exp $ */
 #include <fcntl.h>
 #include <ctype.h>
 #include <unistd.h>
@@ -97,8 +97,8 @@ int cid_notify(cid_t* c)
 	bzero(&sin, sizeof(sin));
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(3890);
-	if(setsockopt(s, SOL_SOCKET, SO_BROADCAST, &on, sizeof(on)) < 0) {
-		lprintf(error, "setsockopt: %s\n", strerror(errno));
+	if(setsockopt(s, SOL_SOCKET, SO_BROADCAST, (char*)&on, sizeof(on)) < 0) {
+		lprintf(error, "setsockopt: %s...sure you're root?\n", strerror(errno));
 		return -1;
 	}
 	pthread_mutex_lock(&addrmx);

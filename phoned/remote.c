@@ -28,7 +28,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/remote.c,v 1.5 2005/06/16 20:57:10 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/remote.c,v 1.6 2005/06/19 01:24:16 dcp1990 Exp $ */
 /* system includes */
 #include <string.h>
 #include <stdio.h>
@@ -68,7 +68,7 @@ char *parse_command(cmd, cont, s)
 				} else {
 					RNF("513 ERROR: Syntax error: Needs usernamd as argument.\n");
 				}
-			} else if(CHK("tnotify")) {
+			} else if(CHK("thandler")) {
 				cid_t c;
 				c.number = "7823020300";
 				c.name = "BUSH,GEORGE W.";
@@ -76,10 +76,9 @@ char *parse_command(cmd, cont, s)
 				c.hour = 3;
 				c.month = 4;
 				c.minute = 20;
-				cid_notify(&c);
-				cid_log(&c);
+				cid_handle(&c);
 				*cont = 0;
-				RNF("500 OK: Notify tested.\n");
+				RNF("500 OK: Handler tested.\n");
 			} else if(CHK("tparse")) {
 				cid_t* rc;
 				rc = parse_cid("802701083132323130383234070F5354414E444953482048454154494E020A343031333937333337325C\n");

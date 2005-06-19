@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/cid.c,v 1.5 2005/06/18 20:51:29 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/cid.c,v 1.6 2005/06/19 01:24:16 dcp1990 Exp $ */
 /* system includes */
 #include <stdlib.h>
 #include <limits.h>
@@ -166,4 +166,14 @@ cid_t* parse_cid(char* cidstring)
 	c->day = strtol(date + 3, NULL, 10);
 	date[2] = '/';
 	return c;
+}
+void cid_handle(c)
+	cid_t *c;
+{
+	time_t ti;
+	ti = time(NULL);
+	cid_log(c);
+	cid_notify(c);
+	check_condition(c);
+	db_add_call(c, ti);
 }

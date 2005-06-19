@@ -28,7 +28,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/remote.c,v 1.6 2005/06/19 01:24:16 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/remote.c,v 1.7 2005/06/19 05:08:50 dcp1990 Exp $ */
 /* system includes */
 #include <string.h>
 #include <stdio.h>
@@ -43,6 +43,36 @@
 #define CHK(m)	strcasecmp(m, argvect[cpos]) == 0
 #define RNF(m)	s->freeit = 0; free(is); return(m)
 
+/* taken from FreeBSD /usr/src/lib/libc/string/strsep.c */
+char * mysep(stringp, delim)
+	char **stringp;
+	const char *delim;
+{
+	char *s;
+	const char *spanp;
+	int c, sc, inquot = 0;
+	char *tok;
+
+	if ((s = *stringp) == NULL)
+		return (NULL);
+	for (tok = s;;) {
+		c = *s++;
+		spanp = delim;
+		if(c == '"' || c == '\'') inquot = inquot ? 0 : 1;
+		do {
+			if ((sc = *spanp++) == c && !inquot) {
+				if (c == 0)
+					s = NULL;
+				else
+					s[-1] = 0;
+				*stringp = s;
+				return (tok);
+			}
+		} while (sc != 0);
+	}
+	/* NOTREACHED */
+}
+
 char *parse_command(cmd, cont, s)
 	const char *cmd;
 	short *cont;
@@ -53,7 +83,7 @@ char *parse_command(cmd, cont, s)
 	memset(argvect, 0, sizeof(argvect));
 	is = strdup(cmd);
 	*cont = 0x1;
-	for(ap = argvect; (*ap = strsep(&is, " \t")) != NULL;)
+	for(ap = argvect; (*ap = mysep(&is, " \t")) != NULL;)
 		if(**ap != '\0')
 			if(++ap >= &argvect[MAXARGS])
 				break;
@@ -62,11 +92,10 @@ char *parse_command(cmd, cont, s)
 		case init:
 			if(CHK("login")) {
 				++cpos;
-				if(argvect[cpos] != NULL) {
+				if(argvect[cpos] != NULL && argvect[cpos + 1] != NULL) {
 					/* TODO: put login stuff here */
-					RNF("100 PASSWORD: Please give me a password.\n");
 				} else {
-					RNF("513 ERROR: Syntax error: Needs usernamd as argument.\n");
+					RNF("513 ERROR: Syntax error: Needs username and pass as arguments.\n");
 				}
 			} else if(CHK("thandler")) {
 				cid_t c;
@@ -91,6 +120,14 @@ char *parse_command(cmd, cont, s)
 				stmod(argvect[1] != NULL ? argvect[1] : "AT\r\n");
 				*cont = 0;
 				RNF("500 OK: Give Me Modem tested.\n");
+			} else if(CHK("echo")) {
+				char *it;
+				s->freeit = 1;
+				if(argvect[1] != NULL) it = strdup(argvect[1]); else it = strdup("die fucka");
+				free(is);
+				return(it);
+			} else {
+				RNF("513 ERROR: Unrecognised Command\n");
 			}
 			break;
 		case loginstage:

@@ -67,13 +67,12 @@ void *network(b)
 {
 	int 		s, /* us,*/ sn;
 	fd_set		fds;
-	int		sin_size, ilen;
+	int		ilen;
 	pthread_t	thr;
-	char		cbuf[1];
-	void*		 is;
+	char		cbuf[2];
 	struct sockaddr_un it;
 	cbuf[0] = '\0'; cbuf[1] = '\0';
-	is = b;
+	if(b == 0) b = 0;
 	if((s = socket(AF_LOCAL, SOCK_STREAM, 0)) == -1) {
 		lprintf(error, "socket: %s\n", strerror(errno));
 		shutd(0x1|0x2|0x4|0x10|0x20);
@@ -92,7 +91,6 @@ void *network(b)
 		shutd(0x1|0x2|0x4|0x10|0x20);
 		exit(-1);
 	}
-	sin_size = sizeof(struct sockaddr_in);
 	for(;;) {
 		FD_ZERO(&fds);
 		FD_SET(s, &fds);
@@ -125,6 +123,7 @@ void *network(b)
 			}
 		}
 	}
+	/* NOTREACHED */
 	close(s);
 	unlink(SOCKETFILE);
 }

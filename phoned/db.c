@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/db.c,v 1.6 2005/06/20 01:39:50 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/db.c,v 1.7 2005/06/20 01:45:08 dcp1990 Exp $ */
 #include <stdio.h>
 #include <string.h>
 #include <pthread.h>
@@ -176,7 +176,7 @@ short db_check_crend(loginna, pass)
 	while((rc = sqlite3_step(cst)) == SQLITE_ROW) {
 		lres = sqlite3_column_text(cst, 0);
 		pres = sqlite3_column_text(cst, 1);
-		if(strcmp(lres, loginna) == 0 && strcasecmp(lres, pmd5) == 0) {
+		if(strcmp(lres, loginna) == 0 && strcasecmp(pres, pmd5) == 0) {
 			di = 1;
 			break;
 		}

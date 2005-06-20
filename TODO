@@ -1,13 +1,20 @@
-$Amigan: phoned/TODO,v 1.1 2005/06/13 03:53:13 dcp1990 Exp $
+$Amigan: phoned/TODO,v 1.2 2005/06/20 03:05:01 dcp1990 Exp $
 TODO
 For phoned:
-*Handle conditions (write the glue)
-*Parse socket in
-*Make modem and other stuff pluggable
-*Write rockwell voice support
+*Handle conditions (write the glue) - Halfway done.
+*Parse socket in - ok, add more commands
+*Make modem and other stuff pluggable - modularised it, now for actual plugin code
+*Write rockwell voice support - libpvf is here
 *Write answering subsystem
+*Add DB management functions as remote commands
+*Fix all possible memory leaks (isn't this always a TODO?)
 For phonectl:
 *Clean up interface
 *Add ncurses mode
 For xfone:
 *Begin it
+For scripts:
+*Clean up usermaint.tcl, add more stuff
+
+For everything:
+*Write documentation

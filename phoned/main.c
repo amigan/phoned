@@ -43,6 +43,7 @@ int main(argc, argv)
 	cf.cfile = CONFIGFILE;
 	cf.dbfile = DBFILE;
 	cf.logfile = LOGFILE;
+	cf.sockfile = SOCKETFILE;
 #define OPTSTRING "dhc:l:"
 	while((c = getopt(argc, argv, OPTSTRING)) != -1)
 		switch(c) {

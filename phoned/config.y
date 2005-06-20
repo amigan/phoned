@@ -34,7 +34,7 @@ int yywrap(void)
 }
 %}
 %token NOTIFY OBRACE CBRACE SCOLON QUOTE MODDEV MAIN LLEVEL OR
-%token FILTERS ACTION NAME PHNUM FILTER FLAGS DB
+%token FILTERS ACTION NAME PHNUM FILTER FLAGS DB SOCK
  /* HANGUP IGNOREIT PLAY RECORD */
 %token <number> LNUML ACTN FLAG
 %token <string> IPADDR PATH REGEX FNAME
@@ -66,6 +66,8 @@ directive:
 	loglevel
 	|
 	database
+	|
+	socket
 	;
 notify:
 	NOTIFY iplist
@@ -82,6 +84,18 @@ ipadr:
 	{
 		lprintf(debug, "Encountered ipaddress %s\n", $1);
 		addtoaddrs($1);
+	}
+	;
+socket:
+	SOCK sockpath
+	;
+sockpath:
+	QUOTE PATH QUOTE
+	{
+		lprintf(debug, "Socket path == %s\n", $2);
+		pthread_mutex_lock(&cfmx);
+		cf.sockfile = $2;
+		pthread_mutex_unlock(&cfmx);
 	}
 	;
 database:

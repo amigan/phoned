@@ -30,8 +30,10 @@ void shutd(whatdone)
 	int whatdone;
 {
 	lprintf(fatal, "phoned shutting down (th %s)...\n", pthread_equal(pthread_self(), networkth) ? "network" : (pthread_equal(pthread_self(), modemth) ? "modem" : "other/main"));
-	awaken_sel();
-	unlink(SOCKETFILE);
+	/* awaken_sel(); */
+	pthread_mutex_lock(&cfmx);
+	unlink(cf.sockfile);
+	pthread_mutex_unlock(&cfmx);
 	if(whatdone & WD_MODEM) modem_wake();
 	flush_lists();
 	flush_logins();

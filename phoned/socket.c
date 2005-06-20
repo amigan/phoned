@@ -49,6 +49,8 @@
 
 extern pthread_mutex_t modemmx;
 extern pthread_mutex_t buffermx;
+extern pthread_mutex_t cfmx;
+extern struct conf cf;
 pthread_t networkth;
 int selpipes[2];
 pthread_mutex_t spipsmx;
@@ -97,7 +99,9 @@ void *network(b)
 	pthread_mutex_lock(&spipsmx);
 	pipe(selpipes);
 	pthread_mutex_unlock(&spipsmx);
-	strcpy(it.sun_path, SOCKETFILE);
+	pthread_mutex_lock(&cfmx);
+	strcpy(it.sun_path, cf.sockfile);
+	pthread_mutex_unlock(&cfmx);
 	it.sun_family = AF_LOCAL;
 	if(bind(s, (struct sockaddr *)&it, 1 + strlen(it.sun_path) +
 					sizeof(it.sun_family)) == -1) {
@@ -146,6 +150,8 @@ void *network(b)
 		if(*cbuf != 0) break;
 	}
 	close(s);
-	unlink(SOCKETFILE);
+	pthread_mutex_lock(&cfmx);
+	unlink(cf.sockfile);
+	pthread_mutex_unlock(&cfmx);
 	pthread_exit(NULL);
 }

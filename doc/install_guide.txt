@@ -1,37 +1,49 @@
-$Amigan: phoned/doc/install_guide.txt,v 1.2 2005/06/01 00:43:07 dcp1990 Exp $
+$Amigan: phoned/doc/install_guide.txt,v 1.3 2005/06/20 03:16:27 dcp1990 Exp $
 **************************************************************************
 **		phoned installation guide -- it's good			**
 **			(C)2005, Dan Ponte				**
 **************************************************************************
 1.0 Introduction
 phoned is [supposed to be] a powerful phone answering system, much like
-VOCP. However, it is more-client-server based.
+VOCP. However, it is more client-server based.
 
 The phoned distribution consists of the following:
 *phoned - the main daemon responsible for logging stuff and talking to
  clients and the modem
 *xfone - a Tcl/Tk application for checking messages and administering
  mailboxes
+*Various scripts to administer stuff
+*phonectl to talk to phoned via command line
 
 2.0 Requirements
-In order to use the base phoned and phonecall, you must have at least the
+In order to use the base phoned, you must have at least the
 following:
 *A Unix system capable of using sockets and talking to a modem
 	(tested on FreeBSD) (the phoned suite will NOT run on windows. Get a
 				better OS. It might run on OSX.)
-*Perl (tested on 5.8.6) (dunno why, just have it)
+*Tcl 8.4 (for xfone and scripts)
+*Tk 8.4 (for xfone)
+*Tcllib with md5 stuff.
+*A C compiler (capable of understanding my mix of ANSI C and other dialect)...GCC works well.
+*PCRE
+*SQLite3 libraries (with Tcl bindings for scripts)
 *A voice modem supported by us. Tested with the Diamond SupraExpress 56i
  Sp (Rockwell chipset/driver)
-*Telephone service
+*Telephone service (no shit?)
 *A telephone, mic, or other recording device to record the greeting messages
 *A friend who has a telephone to annoy so he can test the system ;-)
 
 Optional:
-*Caller ID service from your phone company in order to use cnd
+*Caller ID service from your phone company in order to use any filter and notify stuff
+ (this is basically a requirement, but not so much as to make stuff not work)
 *The Festival Speech Synthesis package, available under FreeBSD ports as
  audio/festival/, in order to use the speech capabilities (highly
- recommended.)
+ recommended.) (this is not implemented yet -Dan)
 
-In order to run xfone, you need:
-*Tcl 8.4
-*Tk 8.4
+2.1 Compilation and Installation
+Compilation is fairly straightforward: cd to the root directory of the distribution and
+type "make". There is currently no install target, but installation is very simple: copy
+the phoned binary and configuration file to appropriate places. (/usr/local/{bin,etc} work
+well).
+
+...to be continued (just email me if you have questions).

@@ -1,4 +1,4 @@
-$Amigan: phoned/README,v 1.5 2005/06/19 05:51:07 dcp1990 Exp $
+$Amigan: phoned/README,v 1.6 2005/06/20 03:16:24 dcp1990 Exp $
 +=======================================+
 |		phoned			|
 |	(C)2005, Dan Ponte		|
@@ -12,11 +12,14 @@ some day.
 
 To build, simply type 'make'. phoned was written for BSD make (just "make"
 on regular BSD systems, "pmake" on many linux machines.) For further
-installation instructions, please see doc/install_guide.txt.
+installation instructions, please see doc/install_guide.txt, which may be
+out of date.
 
 NOTE that lib/libpvf/ (library for converting from rockwell and other
 formats to pvf, a portable format) is GPL'd code. However, I don't forsee
-many troubles, since the BSD license is compatible.
+many troubles, since the BSD license is compatible. Also, the MD5 code is
+(C) L. Peter Deutsch (of Aladdin), and is under a BSD-like license. Please
+respect it.
 
 You will find the following directories in this source archive:
 

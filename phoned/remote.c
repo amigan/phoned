@@ -28,7 +28,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/remote.c,v 1.8 2005/06/20 01:39:50 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/remote.c,v 1.9 2005/06/20 01:51:28 dcp1990 Exp $ */
 /* system includes */
 #include <string.h>
 #include <stdio.h>
@@ -42,6 +42,7 @@
 #define MAXARGS 15
 #define CHK(m)	strcasecmp(m, argvect[cpos]) == 0
 #define RNF(m)	s->freeit = 0; free(is); return(m)
+#define LOGGEDIN	s->l != NULL
 
 login_t *usertop = 0x0;
 pthread_mutex_t usermx = PTHREAD_MUTEX_INITIALIZER;

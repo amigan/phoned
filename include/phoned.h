@@ -3,7 +3,7 @@
  * (C)2005, Dan Ponte
  * BSDL w/ advert.
  */
-/* $Amigan: phoned/include/phoned.h,v 1.20 2005/06/19 04:45:33 dcp1990 Exp $ */
+/* $Amigan: phoned/include/phoned.h,v 1.21 2005/06/20 01:39:48 dcp1990 Exp $ */
 #include <pcre.h> /* fugly, I know... */
 #define VERSION "0.1"
 #define LOGFILE "-"
@@ -99,6 +99,12 @@ typedef struct cnd_t {
 	struct cnd_t* last;
 	struct cnd_t* next;
 } cond_t;
+typedef struct logn_t {
+	char *name;
+	time_t logintime;
+	struct logn_t *last;
+	struct logn_t *next;
+} login_t;
 typedef enum modes_t {
 	ok,
 	ring,
@@ -125,6 +131,7 @@ typedef struct si_t {
 	short freeit;
 	FILE* fpo;
 	int fd;
+	login_t *l;
 } state_info_t;
 
 #ifdef HAVE_INET_INCS
@@ -171,6 +178,13 @@ void cid_handle(cid_t *c);
 void awaken_sel(void);
 void modem_wake(void);
 void fillset(void);
+login_t *check_logged_in(char *loginna, login_t *top);
+short log_in_user(char *loginna, char *pass, login_t **lnt);
+login_t *add_to_login_list(char *loginna, login_t **toppt);
+void log_out_user(char *loginna, login_t **toppt);
+void free_login(login_t *t, short traverse);
+void flush_logins(void);
+short db_check_crend(char *loginna, char *pass);
 /* old stuff...
 void modem_pickup(void);
 void modem_hangup(void);

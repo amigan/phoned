@@ -28,7 +28,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/remote.c,v 1.7 2005/06/19 05:08:50 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/remote.c,v 1.8 2005/06/20 01:39:50 dcp1990 Exp $ */
 /* system includes */
 #include <string.h>
 #include <stdio.h>
@@ -42,6 +42,9 @@
 #define MAXARGS 15
 #define CHK(m)	strcasecmp(m, argvect[cpos]) == 0
 #define RNF(m)	s->freeit = 0; free(is); return(m)
+
+login_t *usertop = 0x0;
+pthread_mutex_t usermx = PTHREAD_MUTEX_INITIALIZER;
 
 /* taken from FreeBSD /usr/src/lib/libc/string/strsep.c */
 char * mysep(stringp, delim)
@@ -58,7 +61,13 @@ char * mysep(stringp, delim)
 	for (tok = s;;) {
 		c = *s++;
 		spanp = delim;
-		if(c == '"' || c == '\'') inquot = inquot ? 0 : 1;
+		if(c == '"') {
+			if(inquot) {
+				s[-1] = 0;
+				c = *s++;
+			}
+			inquot = inquot ? 0 : 1;
+		}
 		do {
 			if ((sc = *spanp++) == c && !inquot) {
 				if (c == 0)
@@ -73,29 +82,170 @@ char * mysep(stringp, delim)
 	/* NOTREACHED */
 }
 
+login_t *check_logged_in(loginna, top)
+	char *loginna;
+	login_t *top;
+{
+	login_t *c;
+	if(top == 0x0) return 0;
+	for(c = top; c->next != NULL; c = c->next) {
+		if(strcmp(loginna, c->name) == 0) {
+			return c;
+		}
+	}
+	if(strcmp(loginna, c->name) == 0) {
+		return c;
+	}
+	return NULL;
+}
+
+void log_out_user(loginna, toppt) /* needs locking */
+	char *loginna;
+	login_t **toppt;
+{
+	login_t *c, *top, *l;
+	short found = 0;
+	top = *toppt;
+	if(loginna != NULL) {
+		for(c = top; c != NULL; c = c->next) {
+			if(strcmp(loginna, c->name) == 0) {
+				found = 1;
+				break;
+			}
+		}
+		if(!found) return;
+		top = c;
+	}
+	if(top->last == 0x0) {
+		if(top->next != 0x0) c = top->next; else c = 0x0;
+		free_login(top, 0);
+		if(!c) *toppt = 0x0; else *toppt = c;
+	} else {
+		c = top->next;
+		l = top->last;
+		free_login(top, 0);
+		l->next = c;
+		c->last = l;
+	}
+}
+
+void free_login(t, traverse)
+	login_t *t;
+	short traverse;
+{
+	login_t *c, *nex;
+	if(!traverse) {
+		free(t->name);
+		free(t);
+	} else {
+		c = t;
+		while(c != NULL) {
+			nex = c->next;
+			free_login(c, 0); /* recursive, babayyy */
+			c = nex;
+		}
+	}
+}
+
+void flush_logins(void)
+{
+	pthread_mutex_lock(&usermx);
+	free_login(usertop, 1);
+	pthread_mutex_unlock(&usermx);
+}
+
+login_t *add_to_login_list(loginna, toppt)
+	char *loginna;
+	login_t **toppt;
+{
+	login_t *c, *n, *top;
+	time_t now;
+	now = time(NULL);
+	top = *toppt;
+	n = malloc(sizeof(login_t));
+	memset(n, 0x0, sizeof(login_t));
+	n->logintime = now;
+	n->name = strdup(loginna);
+	if(top == 0x0) {
+		*toppt = n;
+	} else {
+		for(c = top; c->next != NULL; c = c->next);
+		n->last = c;
+		c->next = n;
+	}
+	return n;
+}
+		
+
+short log_in_user(loginna, pass, lnt)
+	char *loginna;
+	char *pass;
+	login_t **lnt;
+{
+	pthread_mutex_lock(&usermx);
+	if((*lnt = check_logged_in(loginna, usertop))) {
+		pthread_mutex_unlock(&usermx);
+		return -1;
+	}
+	if(db_check_crend(loginna, pass)) {
+		*lnt = add_to_login_list(loginna, &usertop);
+		pthread_mutex_unlock(&usermx);
+		return 1;
+	} else {
+		pthread_mutex_unlock(&usermx);
+		return 0;
+	}
+	/* NOTREACHED */
+	pthread_mutex_unlock(&usermx);
+	return 0;
+}
+
 char *parse_command(cmd, cont, s)
 	const char *cmd;
 	short *cont;
 	state_info_t *s;
 {
-	char **ap, *is, *argvect[MAXARGS];
+	char **ap, *is, *argvect[MAXARGS], *ia;
 	int cpos = 0;
+	int rc;
 	memset(argvect, 0, sizeof(argvect));
 	is = strdup(cmd);
+	ia = is;
 	*cont = 0x1;
-	for(ap = argvect; (*ap = mysep(&is, " \t")) != NULL;)
+	for(ap = argvect; (*ap = mysep(&ia, " \t")) != NULL;) {
+		if(**ap == '"') *ap = *ap + 1;
 		if(**ap != '\0')
 			if(++ap >= &argvect[MAXARGS])
 				break;
+	}
 	/* begin checking */
 	switch(s->st) {
 		case init:
 			if(CHK("login")) {
 				++cpos;
 				if(argvect[cpos] != NULL && argvect[cpos + 1] != NULL) {
-					/* TODO: put login stuff here */
+					rc = log_in_user(argvect[cpos], argvect[cpos + 1], &s->l);
+					cpos++;
+					if(rc == -1) {
+						RNF("501 LOGGEDIN: Already logged in.\n");
+					} else if(rc) {
+						RNF("501 LOGGEDIN: Logged in! Welcome!\n");
+					} else if(!rc) {
+						RNF("514 LOGINFAIL: Login failed.\n");
+					}
 				} else {
 					RNF("513 ERROR: Syntax error: Needs username and pass as arguments.\n");
+				}
+			} else if(CHK("logout")) {
+				if(s->l != NULL) {
+					pthread_mutex_lock(&usermx);
+					log_out_user(NULL, &s->l);
+					if(s->l == 0x0) usertop = 0;
+					pthread_mutex_unlock(&usermx);
+					s->l = NULL;
+					RNF("502 LOGGEDOUT: User logged out.\n");
+				} else {
+					RNF("513 ERROR: Not logged in!\n");
 				}
 			} else if(CHK("thandler")) {
 				cid_t c;
@@ -168,6 +318,12 @@ void begin_dialogue(fp, fd)
 			}
 			if(si.freeit) free(rcode);
 		}
+	}
+	if(si.l != NULL) {
+		pthread_mutex_lock(&usermx);
+		log_out_user(NULL, &si.l);
+		if(si.l == 0x0) usertop = 0;
+		pthread_mutex_unlock(&usermx);
 	}
 	lprintf(info, "Connection closed in begin_dialogue\n");
 }

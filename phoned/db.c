@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/db.c,v 1.5 2005/06/19 04:46:15 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/db.c,v 1.6 2005/06/20 01:39:50 dcp1990 Exp $ */
 #include <stdio.h>
 #include <string.h>
 #include <pthread.h>
@@ -37,6 +37,7 @@
 #include <sqlite3.h>
 
 #include <phoned.h>
+#include <ourmd5.h>
 
 #define USERS_TABLE	"users"
 #define CALLS_TABLE	"calls"
@@ -143,6 +144,53 @@ short db_destroy(void)
 
 /* stuff that does stuff */
 
+short db_check_crend(loginna, pass)
+	char *loginna;
+	char *pass; /* not md5'd yet */
+{
+	int rc;
+	char *sql;
+	md5_state_t state;
+	md5_byte_t digest[16];
+	const char *tail;
+	char pmd5[20];
+	int di;
+	const unsigned char *lres, *pres;
+	sqlite3_stmt *cst;
+	md5_init(&state);
+	md5_append(&state, (const md5_byte_t *)pass, strlen(pass));
+	md5_finish(&state, digest);
+	for(di = 0; di < 16; ++di)
+		sprintf(pmd5 + di * 2, "%02x", digest[di]);
+	lprintf(debug, "Digest came out to %s\n", pmd5);
+	sql = sqlite3_mprintf("SELECT login,passmd5 FROM " USERS_TABLE " WHERE login=='%q' AND passmd5=='%q'", loginna, pmd5);
+	pthread_mutex_lock(&dbmx);
+	rc = sqlite3_prepare(db, sql, strlen(sql), &cst, &tail);
+	sqlite3_free(sql);
+	if(rc != SQLITE_OK) {
+		lprintf(error, "db_check_crend: error prepare: %s\n", sqlite3_errmsg(db));
+		pthread_mutex_unlock(&dbmx);
+		return 0;
+	}
+	di = 0;
+	while((rc = sqlite3_step(cst)) == SQLITE_ROW) {
+		lres = sqlite3_column_text(cst, 0);
+		pres = sqlite3_column_text(cst, 1);
+		if(strcmp(lres, loginna) == 0 && strcasecmp(lres, pmd5) == 0) {
+			di = 1;
+			break;
+		}
+	}
+	if(rc != SQLITE_OK && rc != SQLITE_DONE && rc != SQLITE_ROW) {
+		lprintf(error, "db_check_crend: error step: %s\n", sqlite3_errmsg(db));
+		pthread_mutex_unlock(&dbmx);
+		return 0;
+	}
+	sqlite3_finalize(cst);
+	pthread_mutex_unlock(&dbmx);
+	if(di) return 1;
+	return 0;
+}
 short db_add_call(c, t)
 	cid_t *c;
 	time_t t;

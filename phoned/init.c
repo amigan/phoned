@@ -34,6 +34,7 @@ void shutd(whatdone)
 	unlink(SOCKETFILE);
 	if(whatdone & WD_MODEM) modem_wake();
 	flush_lists();
+	flush_logins();
 	free_condition(topcond, 0x1);
 	if(whatdone & WD_DBINIT) db_destroy();
 	pthread_mutex_lock(&logfmx);

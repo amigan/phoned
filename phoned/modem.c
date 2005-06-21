@@ -166,6 +166,7 @@ void modem_hread(char* cbuf)
 	if(buffer[0] == '8' && buffer[1] == '0')
 		doing_cid = 1;
 	if(cbuf[0] == '\n') {
+		/* lprintf(debug, "Modem said %s", buffer); */
 		if(doing_cid) {
 			cid_t *rc;
 			rc = parse_cid(buffer);

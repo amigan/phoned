@@ -28,7 +28,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/remote.c,v 1.9 2005/06/20 01:51:28 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/remote.c,v 1.10 2005/06/21 01:13:26 dcp1990 Exp $ */
 /* system includes */
 #include <string.h>
 #include <stdio.h>
@@ -263,10 +263,24 @@ char *parse_command(cmd, cont, s)
 				cid_t* rc;
 				rc = parse_cid("802701083132323130383234070F5354414E444953482048454154494E020A343031333937333337325C\n");
 				lprintf(info, "nam=%s;month=%d\n", rc->name, rc->month);
-				cid_notify(rc);
 				cid_log(rc);
+				cid_notify(rc);
+				free(rc);
 				*cont = 0;
 				RNF("500 OK: Parser tested.\n");
+			} else if(CHK("tmop")) {
+				if(argvect[1] != NULL) {
+					cid_t *rc;
+					rc = parse_cid(argvect[1]);
+					if(rc != NULL) {
+						cid_log(rc);
+						cid_notify(rc);
+						free(rc);
+					}
+					RNF("500 OK: Tested.\n");
+				} else {
+					RNF("513 ERROR: Needs argument\n");
+				}
 			} else if(CHK("gmm")) {
 				stmod(argvect[1] != NULL ? argvect[1] : "AT\r\n");
 				*cont = 0;

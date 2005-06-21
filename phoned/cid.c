@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/cid.c,v 1.6 2005/06/19 01:24:16 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/cid.c,v 1.7 2005/06/21 01:13:26 dcp1990 Exp $ */
 /* system includes */
 #include <stdlib.h>
 #include <limits.h>
@@ -36,7 +36,9 @@
 #include <time.h>
 #include <ctype.h>
 #include <stdio.h>
-#include "phoned.h"
+#include <phoned.h>
+#define BOGUS(pnt, cl, st, orig)	if(pnt + cl > orig + st) { \
+	lprintf(error, "Packet length of %d is bogus (len is %d!)", cl, st); break; }
 int free_cid(cid_t* ctf)
 {
 	free(ctf->name);
@@ -44,33 +46,155 @@ int free_cid(cid_t* ctf)
 	free(ctf);
 	return 1;
 }
+cid_t *decode_sdmf(s)
+	unsigned char *s;
+{
+	unsigned char *p;
+	unsigned char dtbuf[2];
+	int i = 0, ld;
+	cid_t *c;
+	if(*s != 0x04) return NULL; /* 0x04 is SDMF, anything else is garbage */
+	c = malloc(sizeof(cid_t));
+	memset(c, 0x0, sizeof(cid_t));
+	c->name = strdup("NO NAME");
+	p = s;
+	p++;
+	ld = *p++;
+	i = strlen(p);
+	dtbuf[2] = 0x0;
+	*dtbuf = *p++;
+	dtbuf[1] = *p++;
+	c->month = ((*dtbuf - '0') * 10) + (dtbuf[1] - '0');
+	*dtbuf = *p++;
+	dtbuf[1] = *p++;
+	c->day = ((*dtbuf - '0') * 10) + (dtbuf[1] - '0');
+	*dtbuf = *p++;
+	dtbuf[1] = *p++;
+	c->hour = ((*dtbuf - '0') * 10) + (dtbuf[1] - '0');
+	*dtbuf = *p++;
+	dtbuf[1] = *p++;
+	c->minute = ((*dtbuf - '0') * 10) + (dtbuf[1] - '0');
+	c->number = malloc(strlen(p) * sizeof(unsigned char));
+	snprintf(c->number, strlen(p), "%s", p);
+	return c;
+}
+
+cid_t *decode_mdmf(s)
+	unsigned char *s;
+{
+	unsigned char *p;
+	unsigned char dtbuf[2];
+	int i = 0, j = 0, ld, cpl, checksum;
+	cid_t *c;
+	if(*s != 0x80) return NULL; /* 0x04 is SDMF, anything else is garbage */
+	c = malloc(sizeof(cid_t));
+	memset(c, 0x0, sizeof(cid_t));
+	p = s;
+	p++;
+	ld = *p++;
+	i = strlen(p);
+	lprintf(info, "p == 0x%x", *p);
+	for(; p <= s + i; /* look below */) {
+		switch(*p++) { /* data type */
+			case 0x01: /* date and time */
+				cpl = *p++;
+				BOGUS(p, cpl, i, s);
+				if(cpl != 8) lprintf(warn, "decode_mdmf: Warning: date length != 8 (%d really)", cpl);
+				*dtbuf = *p++;
+				dtbuf[1] = *p++;
+				dtbuf[2] = '\0';
+				c->month = ((*dtbuf - '0') * 10) + (dtbuf[1] - '0');
+				*dtbuf = *p++;
+				dtbuf[1] = *p++;
+				c->day = ((*dtbuf - '0') * 10) + (dtbuf[1] - '0');
+				*dtbuf = *p++;
+				dtbuf[1] = *p++;
+				c->hour = ((*dtbuf - '0') * 10) + (dtbuf[1] - '0');
+				*dtbuf = *p++;
+				dtbuf[1] = *p++;
+				c->minute = ((*dtbuf - '0') * 10) + (dtbuf[1] - '0');
+				break;
+			case 0x02: /* number */
+				cpl = *p++;
+				BOGUS(p, cpl, i, s);
+				if(cpl != 10) lprintf(info, "decode_mdmf: Info: number length != 10 (%d really)", cpl);
+				c->number = malloc(cpl * sizeof(unsigned char));
+				memset(c->number, 0, cpl * sizeof(unsigned char));
+				for(j = 0; j < cpl && *p != 0; j++) {
+					c->number[j] = *p++;
+				}
+				c->number[j] = '\0';
+				break;
+			case 0x04: /* number not available */
+				cpl = *p++;
+				BOGUS(p, cpl, i, s);
+				if(cpl < 0x01) {
+					lprintf(warn, "decode_mdmf: Warning: type 0x04 (no number) len < 1 (%d really)", cpl);
+					break;
+				}
+				*dtbuf = *p++;
+				if(c->number != NULL)
+					c->number = strdup(*dtbuf == 'O' ? "UNAVAILABLE" : (*dtbuf == 'P' ? "PRIVATE" : "UNKNOWN")); /* ternary city, baby */
+				if(cpl > 0x01) p += cpl - 1;
+				break;
+			case 0x07: /* name */
+				cpl = *p++;
+				BOGUS(p, cpl, i, s);
+				c->name = malloc(cpl * sizeof(unsigned char));
+				memset(c->name, 0, cpl * sizeof(unsigned char));
+				for(j = 0; j < cpl && p != 0; j++) {
+					c->name[j] = *p++;
+				}
+				c->name[j] = '\0';
+				if(strcmp(c->name, "O") == 0) {
+					free(c->name);
+					c->name = strdup("UNAVAILABLE");
+				} else if(strcmp(c->name, "P") == 0) {
+					free(c->name);
+					c->name = strdup("PRIVATE");
+				}
+				break;
+			case 0x08: /* name not available */
+				cpl = *p++;
+				BOGUS(p, cpl, i, s);
+				if(cpl < 0x01) {
+					lprintf(warn, "decode_mdmf: Warning: type 0x08 (no name) len < 1 (%d really)", cpl);
+					break;
+				}
+				*dtbuf = *p++;
+				if(c->name != NULL)
+					c->name = strdup(*dtbuf == 'O' ? "UNAVAILABLE" : (*dtbuf == 'P' ? "PRIVATE" : "UNKNOWN")); /* ternary city, baby */
+				if(cpl > 0x01) p += cpl - 1;
+				break;
+			default:
+				p++;
+				if(s + i - 1 == p) { /* checksum */
+					checksum = *p++;
+				}
+				break;
+		}
+	}
+	lprintf(info, "Finished mdmf (%d/%d %d:%d %s -- %s)", c->month, c->day, c->hour, c->minute, c->name, c->number);
+	return c;
+}
+
 cid_t* parse_cid(char* cidstring)
 {
-	char *p, *datep;
-	unsigned int len = 0, i;
-	char finalbuf[1024], msg[512];
-	char printbuf[2048];
+	unsigned char *p;
+	unsigned int len = 0;
+	unsigned char finalbuf[1024];
 	unsigned char cch;
-	char cbyte, cbyte2;
-	char bytebuf[10];
-	char date[7];
-	char cidtime[7];
-	char name[128];
-	char phone[128];
+	unsigned char cbyte, cbyte2;
+	unsigned char bytebuf[10];
 	int cur = 0, sz, fbcou = 0;
 	short int finl = 0;
-	char *ct;
 	cid_t* c;
-	c = malloc(sizeof(cid_t));
-	memset(msg, 0, sizeof msg);
 	memset(bytebuf, 0, sizeof bytebuf);
-	memset(date, 0, sizeof date);
 	memset(finalbuf, 0, sizeof(finalbuf));
-	memset(printbuf, 0, sizeof(printbuf) * sizeof(char));
 	if(cidstring[strlen(cidstring)] == '\n')
 		cidstring[strlen(cidstring)] = 0;
 	sz = strlen(cidstring);
-	finl = (sz / 2) - 2;
+	finl = sz / 2;
 	strcpy(bytebuf, "0x");
 	for(cur = 0; cur <= sz; cur++) {
 		cbyte = cidstring[cur++];
@@ -89,6 +213,13 @@ cid_t* parse_cid(char* cidstring)
 	sz = fbcou;
 	p = finalbuf;
 	len = sz;
+	if(*finalbuf == 0x80) {
+		/* MDMF */
+		c = decode_mdmf(finalbuf);
+	} else if(*finalbuf == 0x04) {
+		c = decode_sdmf(finalbuf);
+	} else c = NULL;
+#if 0
 	while(len && !(*p >= 0x30 && *p <= 0x39)) {
 		p++;
 		len--;
@@ -165,6 +296,7 @@ cid_t* parse_cid(char* cidstring)
 	c->month = strtol(date, NULL, 10);
 	c->day = strtol(date + 3, NULL, 10);
 	date[2] = '/';
+#endif
 	return c;
 }
 void cid_handle(c)

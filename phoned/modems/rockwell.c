@@ -27,17 +27,17 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/modems/rockwell.c,v 1.3 2005/06/18 20:38:15 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/modems/rockwell.c,v 1.4 2005/06/22 22:00:10 dcp1990 Exp $ */
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <limits.h>
 #include <pthread.h>
 #include <phoned.h>
-#define ROCKWELL_INITSTRING	"ATZ\r\nAT E0 #CID=2 V0\r\n"
-#define ROCKWELL_PICKUP		"ATH1\r\n"
-#define ROCKWELL_HANGUP		"ATH\r\n"
-#define ROCKWELL_RESET		"ATZ\r\n"
+#define ROCKWELL_INITSTRING	"ATZ\r\nAT E0 #CID=2 V0"
+#define ROCKWELL_PICKUP		"ATH1"
+#define ROCKWELL_HANGUP		"ATH"
+#define ROCKWELL_RESET		"ATZ"
 /* LINTLIBRARY */ /* PROTOLIB1 */
 short plug_init(void)
 {
@@ -88,7 +88,68 @@ void rw_hangup(void)
 {
 	stmod(ROCKWELL_HANGUP);
 }
-
+void rw_sdev(d)
+	enum device_t d;
+{
+	char buf[256];
+	int dv;
+	switch(d) {
+		case dialup:
+			dv = 0;
+			break;
+		case handset:
+			dv = 1;
+			break;
+		case speaker:
+			dv = 2;
+			break;
+		case mic:
+			dv = 3;
+			break;
+		case phonewspk:
+			dv = 4;
+			break;
+		case teleemu:
+			dv = 5;
+			break;
+		case spkrphone:
+			dv = 6;
+			break;
+		case musonhold:
+			dv = 7;
+			break;
+		case handsetconvo:
+			dv = 8;
+			break;
+		case soundchip:
+			dv = 9;
+			break;
+		default:
+			dv = 0;
+			break;
+	}
+	sprintf(buf, "AT#VLS=%d", dv);
+	stmod(buf);
+}
+/* voice */
+void rw_voice_init(void)
+{
+	stmod("AT#VSP=55");
+	stmod("AT#VSD=0");
+	stmod("AT#VBS=4");
+	stmod("AT#BDR=16");
+	stmod("A#VTD=3F,3F,3F");
+	stmod("ATS30=60");
+	stmod("AT#CLS=8");
+	rw_sdev(dialup);
+}
+void rw_set_rings(rings)
+	short rings;
+{
+	char buf[20];
+	sprintf(buf, "AT S0=%d", rings);
+	stmod(buf);
+}
 modem_t rockwell = {
 	"ROCKWELL",
 	0x0,
@@ -97,5 +158,8 @@ modem_t rockwell = {
 	&rw_destroy,
 	&rw_evalrc,
 	&rw_pickup,
-	&rw_hangup
+	&rw_hangup,
+	&rw_sdev,
+	&rw_voice_init,
+	&rw_set_rings,
 };

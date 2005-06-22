@@ -76,11 +76,13 @@ void stmod(str)
 		pthread_mutex_unlock(&mpipemx);
 		pthread_mutex_lock(&modemmx);
 		write(modemfd, str, strlen(str) + 1);
+		write(modemfd, "\r\n", 3);
 		pthread_cond_signal(&mpcond);
 		pthread_mutex_unlock(&modemmx);
 	} else {
 		pthread_mutex_lock(&modemmx);
 		write(modemfd, str, strlen(str) + 1);
+		write(modemfd, "\r\n", 3);
 		pthread_mutex_unlock(&modemmx);
 	}
 }
@@ -152,6 +154,7 @@ int init_modem(char* dev)
 	pthread_mutex_unlock(&modemmx);
 	mo = &rockwell;
 	mo->init();
+	voice_init();
 	pthread_mutex_lock(&mpipemx);
 	pipe(modempipes);
 	pthread_mutex_unlock(&mpipemx);

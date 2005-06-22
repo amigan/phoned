@@ -47,9 +47,6 @@
 #include <pthread.h>
 #define MODEM_C
 #include <phoned.h>
-#define ROCKWELL_INITSTRING	"ATZ\r\nAT E0 #CID=2 V0\r\n"
-#define ROCKWELL_PICKUP		"ATH1\r\n"
-#define ROCKWELL_HANGUP		"ATH\r\n"
 /* globals */
 FILE* modem;
 int modemfd;

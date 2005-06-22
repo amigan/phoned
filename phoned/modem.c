@@ -163,7 +163,7 @@ void modem_hread(char* cbuf)
 	pthread_mutex_lock(&buffermx);
 	if(cou < sizeof(buffer) - 2)
 		buffer[cou] = cbuf[0];
-	if(buffer[0] == '8' && buffer[1] == '0')
+	if((buffer[0] == '8' && buffer[1] == '0') || (buffer[0] == '0' && buffer[1] == '4'))
 		doing_cid = 1;
 	if(cbuf[0] == '\n') {
 		/* lprintf(debug, "Modem said %s", buffer); */

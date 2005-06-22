@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/cid.c,v 1.7 2005/06/21 01:13:26 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/cid.c,v 1.8 2005/06/22 04:01:03 dcp1990 Exp $ */
 /* system includes */
 #include <stdlib.h>
 #include <limits.h>
@@ -37,8 +37,9 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <phoned.h>
-#define BOGUS(pnt, cl, st, orig)	if(pnt + cl > orig + st) { \
-	lprintf(error, "Packet length of %d is bogus (len is %d!)", cl, st); break; }
+/* ex: BOGUS(p, cpl, i, s, "numb"); */
+#define BOGUS(pnt, cl, st, orig, part)	if(pnt + cl - 1 > orig + st) { \
+	lprintf(error, "%s: Packet length of %d is bogus (len is %d, would be 0x%x when should 0x%x!)", part, cl, st, pnt + cl, orig + st); break; }
 int free_cid(cid_t* ctf)
 {
 	free(ctf->name);
@@ -51,13 +52,14 @@ cid_t *decode_sdmf(s)
 {
 	unsigned char *p;
 	unsigned char dtbuf[2];
-	int i = 0, ld;
+	int i = 0, ld, rsz, j, cstotal, checksum;
 	cid_t *c;
 	if(*s != 0x04) return NULL; /* 0x04 is SDMF, anything else is garbage */
 	c = malloc(sizeof(cid_t));
 	memset(c, 0x0, sizeof(cid_t));
 	c->name = strdup("NO NAME");
 	p = s;
+	rsz = strlen(s);
 	p++;
 	ld = *p++;
 	i = strlen(p);
@@ -76,6 +78,14 @@ cid_t *decode_sdmf(s)
 	c->minute = ((*dtbuf - '0') * 10) + (dtbuf[1] - '0');
 	c->number = malloc(strlen(p) * sizeof(unsigned char));
 	snprintf(c->number, strlen(p), "%s", p);
+	checksum = s[rsz - 1];
+	cstotal = 0;
+	for(j = 0; j < rsz - 1; j++) {
+		cstotal += s[j];
+	}
+	if((cstotal & 0xff) + checksum != 256)
+		lprintf(warn, "decode_sdmf: Warning: Checksum failed! (0x%x real, cs was 0x%x, total %d)",
+				(cstotal & 0xff) + checksum, checksum, cstotal);
 	return c;
 }
 
@@ -84,11 +94,13 @@ cid_t *decode_mdmf(s)
 {
 	unsigned char *p;
 	unsigned char dtbuf[2];
-	int i = 0, j = 0, ld, cpl, checksum;
+	int i = 0, j = 0, ld, cpl, checksum, rsz;
+	int cstotal;
 	cid_t *c;
 	if(*s != 0x80) return NULL; /* 0x04 is SDMF, anything else is garbage */
 	c = malloc(sizeof(cid_t));
 	memset(c, 0x0, sizeof(cid_t));
+	rsz = strlen(s);
 	p = s;
 	p++;
 	ld = *p++;
@@ -98,7 +110,7 @@ cid_t *decode_mdmf(s)
 		switch(*p++) { /* data type */
 			case 0x01: /* date and time */
 				cpl = *p++;
-				BOGUS(p, cpl, i, s);
+				BOGUS(p, cpl, i, s, "dtime");
 				if(cpl != 8) lprintf(warn, "decode_mdmf: Warning: date length != 8 (%d really)", cpl);
 				*dtbuf = *p++;
 				dtbuf[1] = *p++;
@@ -116,7 +128,7 @@ cid_t *decode_mdmf(s)
 				break;
 			case 0x02: /* number */
 				cpl = *p++;
-				BOGUS(p, cpl, i, s);
+				BOGUS(p, cpl, i, s, "numb");
 				if(cpl != 10) lprintf(info, "decode_mdmf: Info: number length != 10 (%d really)", cpl);
 				c->number = malloc(cpl * sizeof(unsigned char));
 				memset(c->number, 0, cpl * sizeof(unsigned char));
@@ -127,7 +139,7 @@ cid_t *decode_mdmf(s)
 				break;
 			case 0x04: /* number not available */
 				cpl = *p++;
-				BOGUS(p, cpl, i, s);
+				BOGUS(p, cpl, i, s, "nna");
 				if(cpl < 0x01) {
 					lprintf(warn, "decode_mdmf: Warning: type 0x04 (no number) len < 1 (%d really)", cpl);
 					break;
@@ -139,7 +151,7 @@ cid_t *decode_mdmf(s)
 				break;
 			case 0x07: /* name */
 				cpl = *p++;
-				BOGUS(p, cpl, i, s);
+				BOGUS(p, cpl, i, s, "name");
 				c->name = malloc(cpl * sizeof(unsigned char));
 				memset(c->name, 0, cpl * sizeof(unsigned char));
 				for(j = 0; j < cpl && p != 0; j++) {
@@ -156,7 +168,7 @@ cid_t *decode_mdmf(s)
 				break;
 			case 0x08: /* name not available */
 				cpl = *p++;
-				BOGUS(p, cpl, i, s);
+				BOGUS(p, cpl, i, s, "nana");
 				if(cpl < 0x01) {
 					lprintf(warn, "decode_mdmf: Warning: type 0x08 (no name) len < 1 (%d really)", cpl);
 					break;
@@ -174,7 +186,14 @@ cid_t *decode_mdmf(s)
 				break;
 		}
 	}
-	lprintf(info, "Finished mdmf (%d/%d %d:%d %s -- %s)", c->month, c->day, c->hour, c->minute, c->name, c->number);
+	checksum = s[rsz - 1];
+	cstotal = 0;
+	for(j = 0; j < rsz - 1; j++) {
+		cstotal += s[j];
+	}
+	if((cstotal & 0xff) + checksum != 256)
+		lprintf(warn, "decode_mdmf: Warning: Checksum failed! (0x%x real, cs was 0x%x, total %d)",
+				(cstotal & 0xff) + checksum, checksum, cstotal);
 	return c;
 }
 

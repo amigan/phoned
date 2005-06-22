@@ -28,7 +28,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/remote.c,v 1.10 2005/06/21 01:13:26 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/remote.c,v 1.11 2005/06/22 04:01:03 dcp1990 Exp $ */
 /* system includes */
 #include <string.h>
 #include <stdio.h>
@@ -262,7 +262,6 @@ char *parse_command(cmd, cont, s)
 			} else if(CHK("tparse")) {
 				cid_t* rc;
 				rc = parse_cid("802701083132323130383234070F5354414E444953482048454154494E020A343031333937333337325C\n");
-				lprintf(info, "nam=%s;month=%d\n", rc->name, rc->month);
 				cid_log(rc);
 				cid_notify(rc);
 				free(rc);

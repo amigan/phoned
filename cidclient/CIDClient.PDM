@@ -1,0 +1,93 @@
+[Root]
+Most Recent Package=CIDClient Script
+
+
+[Package|CIDClient Script|Root]
+SubWizProgID=PDWizard.SetupPkgSubWiz
+BuildFolder=D:\Programming\cidclient\Package
+
+[Package|CIDClient Script|Configure DAO ISAMs]
+Applicable=No
+
+[Package|CIDClient Script|Configure DAO ODBC]
+JetWorkspace=
+ODBCDirect=
+
+[Package|CIDClient Script|Files Found]
+
+[Package|CIDClient Script|Files Released]
+
+[Package|CIDClient Script|Missing Dependency Information]
+
+[Package|CIDClient Script|Out-of-Date Dependency Information]
+
+[Package|CIDClient Script|Files Added]
+C:\WINDOWS\Fonts\lcd.ttf=
+
+[Package|CIDClient Script|Files Removed]
+
+[Package|CIDClient Script|Files In Project]
+D:\Programming\cidclient\CIDClient.exe=Yes
+C:\WINDOWS\system32\MSVBVM60.DLL=Yes
+C:\WINDOWS\system32\OLEAUT32.DLL=Yes
+C:\WINDOWS\system32\OLEPRO32.DLL=Yes
+C:\WINDOWS\system32\ASYCFILT.DLL=Yes
+C:\WINDOWS\system32\STDOLE2.TLB=Yes
+C:\Program Files\Microsoft Visual Studio\VB98\Wizards\PDWizard\Redist\COMCAT.DLL=Yes
+C:\WINDOWS\system32\MSWINSCK.OCX=Yes
+C:\Program Files\Microsoft Visual Studio\VB98\Wizards\PDWizard\SETUP.EXE=Yes
+C:\Program Files\Microsoft Visual Studio\VB98\Wizards\PDWizard\SETUP1.EXE=Yes
+C:\WINDOWS\system32\VB6STKIT.DLL=Yes
+C:\Program Files\Microsoft Visual Studio\VB98\Wizards\PDWizard\ST6UNST.EXE=Yes
+C:\WINDOWS\Fonts\lcd.ttf=Yes
+
+[Package|CIDClient Script|Configure Registry Files]
+Applicable=No
+
+[Package|CIDClient Script|Configure Remote Servers]
+Applicable=No
+
+[Package|CIDClient Script|Install Locations]
+D:\Programming\cidclient\CIDClient.exe=$(AppPath)
+C:\WINDOWS\system32\MSVBVM60.DLL=$(WinSysPathSysFile)
+C:\WINDOWS\system32\OLEAUT32.DLL=$(WinSysPathSysFile)
+C:\WINDOWS\system32\OLEPRO32.DLL=$(WinSysPathSysFile)
+C:\WINDOWS\system32\ASYCFILT.DLL=$(WinSysPathSysFile)
+C:\WINDOWS\system32\STDOLE2.TLB=$(WinSysPathSysFile)
+C:\Program Files\Microsoft Visual Studio\VB98\Wizards\PDWizard\Redist\COMCAT.DLL=$(WinSysPathSysFile)
+C:\WINDOWS\system32\MSWINSCK.OCX=$(WinSysPath)
+C:\Program Files\Microsoft Visual Studio\VB98\Wizards\PDWizard\SETUP.EXE=$(AppPath)
+C:\Program Files\Microsoft Visual Studio\VB98\Wizards\PDWizard\SETUP1.EXE=$(WinPath)
+C:\WINDOWS\system32\VB6STKIT.DLL=$(WinSysPathSysFile)
+C:\Program Files\Microsoft Visual Studio\VB98\Wizards\PDWizard\ST6UNST.EXE=$(WinPath)
+C:\WINDOWS\Fonts\lcd.ttf=$(Font)
+
+[Package|CIDClient Script|Configure Shared Files]
+Applicable=Yes
+D:\Programming\cidclient\CIDClient.exe=No
+
+[Package|CIDClient Script|Distribution]
+Type=single
+Size=
+Title=CIDClient
+
+[Package|CIDClient Script|IconGroups]
+Group0=CIDClient
+PrivateGroup0=False
+Parent0=$(Programs)
+
+[Package|CIDClient Script|CIDClient]
+Icon1=CIDClient.exe
+Title1=CIDClient Daemon
+StartIn1=$(AppPath)
+Key1=Icon1
+
+[Package|CIDClient Script|Package]
+PackageFolder=D:\Programming\cidclient\Package
+ProjectFolder=D:\Programming\cidclient
+ServerSideCab=
+File1=D:\Programming\cidclient\Package\setup.exe
+File2=D:\Programming\cidclient\Package\Setup.Lst
+File3=D:\Programming\cidclient\Package\CIDClient.CAB
+Handler1=PDWizard.FolderDplySubWiz
+Handler2=PDWizard.WebPostDplySubWiz

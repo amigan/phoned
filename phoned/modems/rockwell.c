@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/modems/rockwell.c,v 1.4 2005/06/22 22:00:10 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/modems/rockwell.c,v 1.5 2005/06/23 02:11:08 dcp1990 Exp $ */
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -161,5 +161,5 @@ modem_t rockwell = {
 	&rw_hangup,
 	&rw_sdev,
 	&rw_voice_init,
-	&rw_set_rings,
+	&rw_set_rings
 };

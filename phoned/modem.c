@@ -151,10 +151,10 @@ int init_modem(char* dev)
 	pthread_mutex_unlock(&modemmx);
 	mo = &rockwell;
 	mo->init();
-	voice_init();
 	pthread_mutex_lock(&mpipemx);
 	pipe(modempipes);
 	pthread_mutex_unlock(&mpipemx);
+	voice_init();
 	return 1;
 }
 

@@ -44,6 +44,7 @@
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <errno.h>
+#include <poll.h>
 #include <pthread.h>
 #define MODEM_C
 #include <phoned.h>
@@ -88,6 +89,7 @@ char *sendwr(str, bufferback, howmuch)
 	char *bufferback;
 	size_t howmuch;
 {
+	struct pollfd	fds[1];
 	if(pthread_mutex_trylock(&modemmx) != 0 && pthread_mutex_trylock(&miomx) != 0) {
 		pthread_mutex_lock(&mpipemx);
 		write(modempipes[1], "G", 1);
@@ -95,8 +97,23 @@ char *sendwr(str, bufferback, howmuch)
 		pthread_mutex_lock(&modemmx);
 		write(modemfd, str, strlen(str) + 1);
 		write(modemfd, "\r\n", 3);
-		read(modemfd, bufferback, howmuch);
-		fgets(bufferback, howmuch, modem);
+		fds[0].fd = modemfd;
+		fds[0].events = POLLRDNORM;
+		switch(poll(fds, 1, 3000)) {
+			case 0:
+				pthread_cond_signal(&mpcond);
+				pthread_mutex_unlock(&modemmx);
+				snprintf(bufferback, howmuch, "*MODEM TIMEOUT*");
+				return bufferback;
+			case -1:
+				lprintf(error, "poll in sendwr: %s\n", strerror(errno));
+				pthread_cond_signal(&mpcond);
+				pthread_mutex_unlock(&modemmx);
+				return bufferback;
+			default:
+				fgets(bufferback, howmuch, modem);
+				break;
+		}
 		pthread_cond_signal(&mpcond);
 		pthread_mutex_unlock(&modemmx);
 	} else {

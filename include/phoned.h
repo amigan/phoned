@@ -3,7 +3,7 @@
  * (C)2005, Dan Ponte
  * BSDL w/ advert.
  */
-/* $Amigan: phoned/include/phoned.h,v 1.25 2005/06/22 22:01:47 dcp1990 Exp $ */
+/* $Amigan: phoned/include/phoned.h,v 1.26 2005/06/23 16:46:06 dcp1990 Exp $ */
 #include <pcre.h> /* fugly, I know... */
 #define VERSION "0.1"
 #define LOGFILE "-"
@@ -130,12 +130,12 @@ typedef struct mod_t {
 	int		deffuncs;
 	int		(*init)(void);
 	int		(*destroy)(void);
-	mod_res_t	(*evalrc)(char *result);
+	mod_res_t	(*evalrc)(char*);
 	void		(*pickup)(void);
 	void		(*hangup)(void);
-	void		(*sdev)(enum device_t d);
+	void		(*sdev)(enum device_t);
 	void		(*voice_init)(void);
-	void		(*set_rings)(short rings);
+	void		(*set_rings)(int);
 } modem_t;	
 typedef enum stat {
 	init = 0,

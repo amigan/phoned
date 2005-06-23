@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/modems/rockwell.c,v 1.5 2005/06/23 02:11:08 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/modems/rockwell.c,v 1.6 2005/06/23 16:46:10 dcp1990 Exp $ */
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -144,7 +144,7 @@ void rw_voice_init(void)
 	rw_sdev(dialup);
 }
 void rw_set_rings(rings)
-	short rings;
+	int rings;
 {
 	char buf[20];
 	sprintf(buf, "AT S0=%d", rings);

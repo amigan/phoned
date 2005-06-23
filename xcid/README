@@ -1,0 +1,5 @@
+To build without XOSD, type
+	make NO_XOSD=yes
+instead of just
+	make.
+Pretty simple to use; you just start it. Stuff can be tweaked in the source to your liking.

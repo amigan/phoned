@@ -3,7 +3,7 @@
  * (C)2005, Dan Ponte
  * BSDL w/ advert.
  */
-/* $Amigan: phoned/include/phoned.h,v 1.26 2005/06/23 16:46:06 dcp1990 Exp $ */
+/* $Amigan: phoned/include/phoned.h,v 1.27 2005/06/23 22:06:58 dcp1990 Exp $ */
 #include <pcre.h> /* fugly, I know... */
 #define VERSION "0.1"
 #define LOGFILE "-"
@@ -139,8 +139,7 @@ typedef struct mod_t {
 } modem_t;	
 typedef enum stat {
 	init = 0,
-	loginstage,
-	pass
+	loggedin
 } states_t;
 typedef struct si_t {
 	states_t st;
@@ -194,6 +193,7 @@ void cid_handle(cid_t *c);
 void awaken_sel(void);
 void modem_wake(void);
 void fillset(void);
+char *sendwr(const char *str, char *bufferback, size_t howmuch);
 login_t *check_logged_in(char *loginna, login_t *top);
 short log_in_user(char *loginna, char *pass, login_t **lnt);
 login_t *add_to_login_list(char *loginna, login_t **toppt);

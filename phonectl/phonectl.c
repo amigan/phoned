@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phonectl/phonectl.c,v 1.4 2005/06/23 21:38:58 dcp1990 Exp $ */
+/* $Amigan: phoned/phonectl/phonectl.c,v 1.5 2005/06/23 22:07:01 dcp1990 Exp $ */
 /* system includes */
 #include <stdio.h>
 #include <stdlib.h>
@@ -59,9 +59,9 @@ int main(argc, argv)
 		perror("conn");
 		exit(-1);
 	}
-	if(argc < 1) {
-		for(;;) {
-			puts("phonectl> ");
+	if(argc == 1) {
+		while(!feof(stdin)) {
+			fputs("phonectl> ", stdout);
 			fgets(buff, 1024, stdin);
 			nl = strchr(buff, '\n');
 			if(nl != NULL) *nl = '\0';
@@ -71,12 +71,12 @@ int main(argc, argv)
 			}
 			write(s, buff, strlen(buff) + 1);
 			read(s, buff, sizeof(buff));
-			puts(buff);
+			fputs(buff, stdout);
 		}
 	}
 	write(s, argv[1], strlen(argv[1]) + 1);
 	read(s, buff, sizeof buff);
-	puts(buff);
+	fputs(buff, stdout);
 	close(s);
 	return 0;
 }

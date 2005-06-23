@@ -83,6 +83,31 @@ void stmod(str)
 		pthread_mutex_unlock(&modemmx);
 	}
 }
+char *sendwr(str, bufferback, howmuch)
+	const char *str;
+	char *bufferback;
+	size_t howmuch;
+{
+	if(pthread_mutex_trylock(&modemmx) != 0 && pthread_mutex_trylock(&miomx) != 0) {
+		pthread_mutex_lock(&mpipemx);
+		write(modempipes[1], "G", 1);
+		pthread_mutex_unlock(&mpipemx);
+		pthread_mutex_lock(&modemmx);
+		write(modemfd, str, strlen(str) + 1);
+		write(modemfd, "\r\n", 3);
+		read(modemfd, bufferback, howmuch);
+		fgets(bufferback, howmuch, modem);
+		pthread_cond_signal(&mpcond);
+		pthread_mutex_unlock(&modemmx);
+	} else {
+		pthread_mutex_lock(&modemmx);
+		write(modemfd, str, strlen(str) + 1);
+		write(modemfd, "\r\n", 3);
+		fgets(bufferback, howmuch, modem);
+		pthread_mutex_unlock(&modemmx);
+	}
+	return bufferback;
+}
 void modem_wake(void)
 {
 	if(pthread_mutex_trylock(&miomx) != 0) {

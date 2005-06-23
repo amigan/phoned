@@ -28,7 +28,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/remote.c,v 1.11 2005/06/22 04:01:03 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/remote.c,v 1.12 2005/06/23 22:07:02 dcp1990 Exp $ */
 /* system includes */
 #include <string.h>
 #include <stdio.h>
@@ -228,8 +228,10 @@ char *parse_command(cmd, cont, s)
 					rc = log_in_user(argvect[cpos], argvect[cpos + 1], &s->l);
 					cpos++;
 					if(rc == -1) {
+						s->st = loggedin;
 						RNF("501 LOGGEDIN: Already logged in.\n");
 					} else if(rc) {
+						s->st = loggedin;
 						RNF("501 LOGGEDIN: Logged in! Welcome!\n");
 					} else if(!rc) {
 						RNF("514 LOGINFAIL: Login failed.\n");
@@ -237,16 +239,29 @@ char *parse_command(cmd, cont, s)
 				} else {
 					RNF("513 ERROR: Syntax error: Needs username and pass as arguments.\n");
 				}
-			} else if(CHK("logout")) {
-				if(s->l != NULL) {
-					pthread_mutex_lock(&usermx);
-					log_out_user(NULL, &s->l);
-					if(s->l == 0x0) usertop = 0;
-					pthread_mutex_unlock(&usermx);
-					s->l = NULL;
-					RNF("502 LOGGEDOUT: User logged out.\n");
+			} else {
+				RNF("513 ERROR: No such command (perhaps not logged in?)\n");
+			}
+			break;
+		case loggedin:
+			if(CHK("logout")) {
+				pthread_mutex_lock(&usermx);
+				log_out_user(NULL, &s->l);
+				if(s->l == 0x0) usertop = 0;
+				pthread_mutex_unlock(&usermx);
+				s->l = NULL;
+				s->st = init;
+				RNF("502 LOGGEDOUT: User logged out.\n");
+			} else if(CHK("stmodem")) {
+				if(argvect[++cpos] != NULL) {
+					char *tempbuf;
+					tempbuf = malloc(512 * sizeof(char));
+					memset(tempbuf, 0, 512 * sizeof(char));
+					sendwr(argvect[cpos], tempbuf, 512);
+					s->freeit = 1;
+					return tempbuf;
 				} else {
-					RNF("513 ERROR: Not logged in!\n");
+					RNF("513 ERROR: Wrong number of arguments.\n");
 				}
 			} else if(CHK("thandler")) {
 				cid_t c;
@@ -293,10 +308,6 @@ char *parse_command(cmd, cont, s)
 			} else {
 				RNF("513 ERROR: Unrecognised Command\n");
 			}
-			break;
-		case loginstage:
-			break;
-		case pass:
 			break;
 	}
 	return NULL;

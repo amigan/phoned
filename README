@@ -1,4 +1,4 @@
-$Amigan: phoned/README,v 1.6 2005/06/20 03:16:24 dcp1990 Exp $
+$Amigan: phoned/README,v 1.7 2005/06/23 02:29:13 dcp1990 Exp $
 +=======================================+
 |		phoned			|
 |	(C)2005, Dan Ponte		|
@@ -23,6 +23,7 @@ respect it.
 
 You will find the following directories in this source archive:
 
+cidclient/ - Win32 caller ID notifier, for VB6 (with NSIS script), like xcid
 cnd/ - Caller ID program
 doc/ - misc. documentation
 examples/ - example scripts
@@ -32,6 +33,7 @@ phonectl/ - command line client to phoned
 phoned/ - main phone daemon written in C
 scripts/ - various administration and cool scripts
 xfone/ - Tcl/Tk interface to phoned
+xcid/ - CID notifier for X clients. Not built by default; cd xcid && cat README
 
 The scripts need tcllib. Please modify the paths in the scripts to libraries
 so that they work.

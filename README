@@ -1,9 +1,22 @@
-$Amigan: phoned/README,v 1.7 2005/06/23 02:29:13 dcp1990 Exp $
+$Amigan: phoned/README,v 1.8 2005/06/23 02:48:39 dcp1990 Exp $
 +=======================================+
 |		phoned			|
 |	(C)2005, Dan Ponte		|
 +=======================================+
-This is the phoned distribution, version 0.1.
+,iPPPPPPPPPpppp	 ::									,iDDDDDDDDDDDDDdddd
+ii          ppp	 ::									ii		 ddd
+ii           pp	 ::									ii		  ddd
+ii          ppp	 ::									ii		   ddd
+ii         pp	 ::									ii		   ddd
+ii        pp	 ::		  ;@@@@@@@;	;;		 dddDDDDBBBBbbb		ii	     	    ddd
+;;;;;;;;pp	 ::bbbbbbbb	 "'	  '"	::bbbbbbbb	eee	     eee	ii		    ddd
+::		 ::      bbb	::	   ::	::	bbb    ee	       ee	::		   ddd
+::		 ::	 bbb	::	   ::	::	bbb    ::::::::::::::::::	::		  ddd
+::		 ::	  bb	;;	   ;;	::	 bb    rr			::		 ddd
+::		 ::	  bb	 "'	  '"	::	 bb	rrr	     rrr	::		ddd
+::		 ::	  bb	  ;@@%%%@@;	::	 bb	  rrrrrrrrrrrr		::DDDDDDDDDDDDdd
+
+This is the phoned distribution, version 1.0.
 phoned is distributed under the license outlined in COPYRIGHT. Please read
 it before use!
 

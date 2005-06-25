@@ -53,6 +53,7 @@ void handsig(sig)
 		case SIGHUP:
 			lprintf(info, "Received HUP, rereading configuration files...\n");
 			break;
+		case SIGPIPE:
 		default:
 			lprintf(warn, "Received signal %d!\n", sig);
 	}
@@ -64,6 +65,7 @@ void install_handlers(void)
 	signal(SIGQUIT, handsig);
 	signal(SIGHUP, handsig);
 	signal(SIGTERM, handsig);
+	signal(SIGPIPE, handsig);
 }
 void fillset(void)
 {

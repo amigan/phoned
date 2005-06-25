@@ -28,13 +28,20 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/remote.c,v 1.12 2005/06/23 22:07:02 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/remote.c,v 1.13 2005/06/25 02:43:54 dcp1990 Exp $ */
 /* system includes */
 #include <string.h>
 #include <stdio.h>
 #include <pthread.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <sys/select.h>
+#include <sys/ioctl.h>
+#include <ctype.h>
+#include <sys/uio.h>
 #include <errno.h>
 /* us */
 #include <phoned.h>
@@ -201,6 +208,76 @@ short log_in_user(loginna, pass, lnt)
 	return 0;
 }
 
+int dialogue_cb(fd, sck)
+	int fd;
+	void *sck;
+{
+	FILE *so = (FILE*)sck;
+	int s;
+	fd_set fds;
+	fd_set ex;
+	char buffer[3];
+	char lastc = 0x0;
+	int rc;
+	s = fileno(so);
+	memset(buffer, 0, sizeof(buffer));
+	for(;;) {
+		FD_ZERO(&fds);
+		FD_ZERO(&ex);
+		FD_SET(s, &ex);
+		FD_SET(fd, &fds);
+		FD_SET(s, &fds);
+		switch(select(s + 1, &fds, NULL, &ex, NULL)) {
+			case -1:
+				lprintf(error, "select on modem: %s", strerror(errno));
+				return 0;
+			case 0:
+				/* WON'T HAPPEN */
+				break;
+			default:
+				{
+					lprintf(debug, "Defaulted!");
+					if(FD_ISSET(s, &ex) != 0) {
+						lprintf(debug, "Exceptional.");
+						return 0;
+					}
+					if(FD_ISSET(fd, &fds) != 0) {
+						rc = read(fd, buffer, 1);
+						if(rc == -1) {
+							lprintf(error, "read(): %s", strerror(errno));
+							return 0;
+						}
+						rc = send(s, buffer, 1, 0x0);
+						lprintf(debug, "rc=%d", rc);
+						if(rc == -1) {
+							lprintf(error, "send(): %s", strerror(errno));
+							return 0;
+						}
+					}
+					if(FD_ISSET(s, &fds) != 0) {
+						rc = recv(s, buffer, 1, 0x0);
+						lprintf(debug, "rcv=%d", rc);
+						if(rc == 0) {
+							lprintf(debug, "Socket closed! Got zero!\n");
+							return 0;
+						} else if(rc == -1) {
+							lprintf(debug, "recv(): %s", strerror(errno));
+							return 0;
+						}
+						if(lastc == '%' && *buffer == 'q') return 1;
+						lastc = *buffer;
+						rc = write(fd, buffer, 1);
+						if(rc == -1) {
+							lprintf(error, "write(): %s", strerror(errno));
+							return 0;
+						}
+					}
+				}
+		}
+	}
+	/* NOTREACHED */
+	return 1;
+}
 char *parse_command(cmd, cont, s)
 	const char *cmd;
 	short *cont;
@@ -274,6 +351,14 @@ char *parse_command(cmd, cont, s)
 				cid_handle(&c);
 				*cont = 0;
 				RNF("500 OK: Handler tested.\n");
+			} else if(CHK("mdlg")) {
+				int rc;
+				rc = dialogue_with_modem(&dialogue_cb, (void*)s->fpo);
+				if(!rc) {
+					return NULL;
+				} else {
+					RNF("500 OK: Dialogue finished");
+				}
 			} else if(CHK("tparse")) {
 				cid_t* rc;
 				rc = parse_cid("802701083132323130383234070F5354414E444953482048454154494E020A343031333937333337325C\n");

@@ -27,18 +27,20 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phonectl/phonectl.c,v 1.5 2005/06/23 22:07:01 dcp1990 Exp $ */
+/* $Amigan: phoned/phonectl/phonectl.c,v 1.6 2005/06/25 02:43:54 dcp1990 Exp $ */
 /* system includes */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <netdb.h>
 #include <netinet/in.h>
 #include <getopt.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <signal.h>
 #include <sys/socket.h>
+#include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <sys/un.h>
 /* us */
@@ -59,6 +61,12 @@ int main(argc, argv)
 		perror("conn");
 		exit(-1);
 	}
+#if 0
+	if(setsockopt(s, IPPROTO_TCP, TCP_NODELAY, (char*)&on, sizeof(on)) < 0) {
+		perror("setsockopt");
+		exit(-1);
+	}
+#endif
 	if(argc == 1) {
 		while(!feof(stdin)) {
 			fputs("phonectl> ", stdout);
@@ -69,8 +77,8 @@ int main(argc, argv)
 				close(s);
 				return 0;
 			}
-			write(s, buff, strlen(buff) + 1);
-			read(s, buff, sizeof(buff));
+			send(s, buff, strlen(buff) + 1, 0x0);
+			recv(s, buff, sizeof(buff), 0x0);
 			fputs(buff, stdout);
 		}
 	}

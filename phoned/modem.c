@@ -42,7 +42,6 @@
 #include <sys/types.h>
 #include <sys/select.h>
 #include <sys/ioctl.h>
-#include <sys/types.h>
 #include <errno.h>
 #include <poll.h>
 #include <pthread.h>
@@ -83,6 +82,26 @@ void stmod(str)
 		write(modemfd, "\r\n", 3);
 		pthread_mutex_unlock(&modemmx);
 	}
+}
+int dialogue_with_modem(cback, arg)
+	int (*cback)(int, void*);
+	void *arg;
+{
+	int rc;
+	if(pthread_mutex_trylock(&modemmx) != 0 && pthread_mutex_trylock(&miomx) != 0) {
+		pthread_mutex_lock(&mpipemx);
+		write(modempipes[1], "G", 1);
+		pthread_mutex_unlock(&mpipemx);
+		pthread_mutex_lock(&modemmx);
+		rc = cback(modemfd, arg);
+		pthread_cond_signal(&mpcond);
+		pthread_mutex_unlock(&modemmx);
+	} else {
+		pthread_mutex_lock(&modemmx);
+		rc = cback(modemfd, arg);
+		pthread_mutex_unlock(&modemmx);
+	}
+	return rc;
 }
 char *sendwr(str, bufferback, howmuch)
 	const char *str;
@@ -208,7 +227,9 @@ void modem_hread(char* cbuf)
 	if((buffer[0] == '8' && buffer[1] == '0') || (buffer[0] == '0' && buffer[1] == '4'))
 		doing_cid = 1;
 	if(cbuf[0] == '\n') {
+#ifdef MODEMSAID
 		lprintf(debug, "Modem said %s", buffer);
+#endif
 		if(doing_cid) {
 			cid_t *rc;
 			rc = parse_cid(buffer);
@@ -246,9 +267,6 @@ void *modem_io(k)
 	pthread_mutex_lock(&modemmx);
 	pthread_mutex_lock(&miomx);
 	for(;;) {
-		pthread_mutex_lock(&cfmx);
-	/*	dotm = cf.modem_tm; */
-		pthread_mutex_unlock(&cfmx);
 		FD_ZERO(&fds);
 		FD_SET(modemfd, &fds);
 		FD_SET(modempipes[0], &fds);

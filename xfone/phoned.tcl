@@ -27,4 +27,5 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Amigan: phoned/xfone/phoned.tcl,v 1.1 2005/06/26 04:47:20 dcp1990 Exp $
+# $Amigan: phoned/xfone/phoned.tcl,v 1.2 2005/06/26 15:55:58 dcp1990 Exp $
+load ./udom.so

@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/lib/sockstuff.c,v 1.2 2005/06/26 15:51:22 dcp1990 Exp $ */
+/* $Amigan: phoned/lib/sockstuff.c,v 1.3 2005/06/26 15:55:58 dcp1990 Exp $ */
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -162,7 +162,7 @@ Tcl_Channel Udom_CreateChannel(sockfile, mask)
 	cdt->channel = Tcl_CreateChannel(&Udom_ChanType, chname, cdt, mask);
 	return cdt->channel;
 }
-int Udom_MakeSock (cdata, interp, argc, argv)
+int Udom_Cmd (cdata, interp, argc, argv)
 	ClientData cdata;
 	Tcl_Interp *interp;
 	int argc;
@@ -199,4 +199,10 @@ int Udom_MakeSock (cdata, interp, argc, argv)
 	Tcl_AppendResult(interp, Tcl_GetChannelName(res), (char*)NULL);
 	return TCL_OK;
 }
-	
+
+int Udom_Init(interp)
+	Tcl_Interp *interp;
+{
+	Tcl_CreateObjCommand(interp, "udom", Udom_Cmd, (ClientData)NULL, (Tcl_CmdDeleteProc*)NULL);
+	return TCL_OK;
+}

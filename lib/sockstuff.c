@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/lib/sockstuff.c,v 1.3 2005/06/26 15:55:58 dcp1990 Exp $ */
+/* $Amigan: phoned/lib/sockstuff.c,v 1.4 2005/06/26 16:06:49 dcp1990 Exp $ */
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -44,6 +44,7 @@
 #include <sys/un.h>
 #include <errno.h>
 #include <tcl.h>
+#define mseterr(m) Udom_Error(interp, m)
 
 #define CMD_ARGS (ClientData clientData, Tcl_Interp *interp, int argc, Tcl_Obj *CONST objv[])
 typedef struct cdta {
@@ -51,7 +52,13 @@ typedef struct cdta {
 	Tcl_Channel channel;
 } Udom_Cdata_t;
 
-
+Udom_Error(interp, msg)
+	Tcl_Interp *interp;
+	char *msg;
+{
+	Tcl_SetResult(interp, msg, TCL_STATIC);
+	return TCL_ERROR;
+}
 int Udom_Close(cdata, interp)
 	ClientData cdata;
 	Tcl_Interp *interp;
@@ -185,14 +192,14 @@ int Udom_Cmd (cdata, interp, argc, argv)
 				!= TCL_OK) return TCL_ERROR;
 		switch((enum udomopt)optind) {
 			case UDOM_FILE:
-				if(a >= argc) return qseterr("needs file!");
+				if(a >= argc) return mseterr("needs file!");
 				sfl = Tcl_GetString(argv[a]);
 				break;
 			default:
 				Tcl_Panic("udom: bad optind to opts");
 		}
 	}
-	if(sfl == NULL) return qseterr("file argument REQUIRED.");
+	if(sfl == NULL) return mseterr("file argument REQUIRED.");
 	res = Udom_CreateChannel(sfl, TCL_READABLE | TCL_WRITABLE);
 	if(res == NULL) return TCL_ERROR;
 	Tcl_ResetResult(interp);

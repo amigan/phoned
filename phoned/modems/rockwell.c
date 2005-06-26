@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/modems/rockwell.c,v 1.7 2005/06/26 03:27:35 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/modems/rockwell.c,v 1.8 2005/06/26 21:44:40 dcp1990 Exp $ */
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -146,6 +146,7 @@ void rw_voice_init(void)
 	stmod("AT#CLS=8");
 	rw_sdev(dialup);
 	stmod("AT#CID=2");
+	stmod("AT#CLS=8");
 }
 void rw_set_rings(rings)
 	int rings;

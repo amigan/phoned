@@ -27,5 +27,8 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Amigan: phoned/xfone/phoned.tcl,v 1.2 2005/06/26 15:55:58 dcp1990 Exp $
+# $Amigan: phoned/xfone/phoned.tcl,v 1.3 2005/06/26 16:08:19 dcp1990 Exp $
 load ./udom.so
+set sockfile "/tmp/phoned.sock"
+set fph [udom -file $sockfile]
+close $fph

@@ -1,7 +1,7 @@
 #!/usr/local/bin/wish8.4
 # Copyright (c) 2005, Dan Ponte
 #
-# phoned.tcl - Tcl interface to phoned's socket using my udom package
+# config.tcl - configureation
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -27,22 +27,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Amigan: phoned/xfone/phoned.tcl,v 1.4 2005/06/26 16:51:00 dcp1990 Exp $
-load ./udom.so
+# $Amigan: phoned/xfone/config.tcl,v 1.1 2005/06/26 16:51:00 dcp1990 Exp $
 
-proc openSock {sfile} {
-	set os [udom -file $sfile]
-	fconfigure $os -buffering line
-	return $os
-}
-
-proc parseres {res} {
-}
-
-proc login {user pass} {
-	global sh
-	puts $sh {login $user $pass}
-	parseres [gets $sh]
-}
-
-set $sh [openSock $sockfile]
+#defaults
+set sockfile "/tmp/phoned.sock"

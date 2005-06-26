@@ -27,8 +27,23 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Amigan: phoned/xfone/maindlg.tcl,v 1.1 2005/06/26 04:47:20 dcp1990 Exp $
+# $Amigan: phoned/xfone/maindlg.tcl,v 1.2 2005/06/26 16:51:00 dcp1990 Exp $
 # vars
+proc logindlg {} {
+	toplevel .login
+	frame .login.m -width 5c -height 2c
+	grid .m -row 0 -column 0
+	label .login.m.lo -text "Login:"
+	entry .login.m.loge
+	grid .login.m.lo .login.m.loge -row 0
+	label .login.m.pa -text "Pass:"
+	entry .login.m.pase -show "*"
+	grid .login.m.pa .login.m.pase -row 1
+	button .login.m.log -text "Login" -command {loginProc [.login.m.loge get] [.login.m.pase get]}
+	button .login.m.cancel -text "Cancel" -command {destroy .login}
+	grid .login.m.log -row 0 -column 0 -sticky ew
+	grid .login.m.cancel -row 0 -column 1 -sticky ew
+}
 set prj .mbar.project
 set phdm .mbar.phoned
 #frame

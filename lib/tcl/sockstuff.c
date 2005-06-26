@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/lib/tcl/sockstuff.c,v 1.4 2005/06/26 16:06:49 dcp1990 Exp $ */
+/* $Amigan: phoned/lib/tcl/sockstuff.c,v 1.5 2005/06/26 16:22:54 dcp1990 Exp $ */
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -148,7 +148,8 @@ Tcl_ChannelType Udom_ChanType = {
 
 
 
-Tcl_Channel Udom_CreateChannel(sockfile, mask)
+Tcl_Channel Udom_CreateChannel(interp, sockfile, mask)
+	Tcl_Interp *interp;
 	CONST char *sockfile;
 	int mask;
 {
@@ -162,6 +163,7 @@ Tcl_Channel Udom_CreateChannel(sockfile, mask)
 	them.sun_family = AF_LOCAL;
 	if(connect(s, (struct sockaddr *)&them, 1 + strlen(them.sun_path) + sizeof(them.sun_family)) == -1) {
 		ckfree((char*)cdt);
+		Tcl_SetResult(interp, strerror(errno), TCL_STATIC);
 		return NULL;
 	}
 	cdt->fd = s;
@@ -189,19 +191,20 @@ int Udom_Cmd (cdata, interp, argc, argv)
 		arg = Tcl_GetString(argv[a]);
 		if(*arg != '-') break;
 		if(Tcl_GetIndexFromObj(interp, argv[a], udomopt, "option", TCL_EXACT, &optind)
-				!= TCL_OK) return TCL_ERROR;
+				!= TCL_OK) return mseterr("Getindex");
 		switch((enum udomopt)optind) {
 			case UDOM_FILE:
 				if(a >= argc) return mseterr("needs file!");
-				sfl = Tcl_GetString(argv[a]);
+				sfl = Tcl_GetString(argv[a + 1]);
 				break;
 			default:
 				Tcl_Panic("udom: bad optind to opts");
 		}
 	}
 	if(sfl == NULL) return mseterr("file argument REQUIRED.");
-	res = Udom_CreateChannel(sfl, TCL_READABLE | TCL_WRITABLE);
+	res = Udom_CreateChannel(interp, sfl, TCL_READABLE | TCL_WRITABLE);
 	if(res == NULL) return TCL_ERROR;
+	Tcl_RegisterChannel(interp, res);
 	Tcl_ResetResult(interp);
 	Tcl_AppendResult(interp, Tcl_GetChannelName(res), (char*)NULL);
 	return TCL_OK;

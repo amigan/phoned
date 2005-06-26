@@ -28,7 +28,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/remote.c,v 1.13 2005/06/25 02:43:54 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/remote.c,v 1.14 2005/06/26 02:56:37 dcp1990 Exp $ */
 /* system includes */
 #include <string.h>
 #include <stdio.h>
@@ -236,7 +236,6 @@ int dialogue_cb(fd, sck)
 				break;
 			default:
 				{
-					lprintf(debug, "Defaulted!");
 					if(FD_ISSET(s, &ex) != 0) {
 						lprintf(debug, "Exceptional.");
 						return 0;
@@ -248,7 +247,6 @@ int dialogue_cb(fd, sck)
 							return 0;
 						}
 						rc = send(s, buffer, 1, 0x0);
-						lprintf(debug, "rc=%d", rc);
 						if(rc == -1) {
 							lprintf(error, "send(): %s", strerror(errno));
 							return 0;
@@ -256,7 +254,6 @@ int dialogue_cb(fd, sck)
 					}
 					if(FD_ISSET(s, &fds) != 0) {
 						rc = recv(s, buffer, 1, 0x0);
-						lprintf(debug, "rcv=%d", rc);
 						if(rc == 0) {
 							lprintf(debug, "Socket closed! Got zero!\n");
 							return 0;
@@ -353,6 +350,7 @@ char *parse_command(cmd, cont, s)
 				RNF("500 OK: Handler tested.\n");
 			} else if(CHK("mdlg")) {
 				int rc;
+				write(s->fd, "500 OK: Entering dialogue...\n", sizeof("500 OK: Entering dialogue...\n"));
 				rc = dialogue_with_modem(&dialogue_cb, (void*)s->fpo);
 				if(!rc) {
 					return NULL;

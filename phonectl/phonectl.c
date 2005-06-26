@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phonectl/phonectl.c,v 1.6 2005/06/25 02:43:54 dcp1990 Exp $ */
+/* $Amigan: phoned/phonectl/phonectl.c,v 1.7 2005/06/26 02:56:36 dcp1990 Exp $ */
 /* system includes */
 #include <stdio.h>
 #include <stdlib.h>
@@ -40,6 +40,7 @@
 #include <sys/types.h>
 #include <signal.h>
 #include <sys/socket.h>
+#include <sys/select.h>
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <sys/un.h>
@@ -53,6 +54,7 @@ int main(argc, argv)
 	char *nl;
 	char buff[1024];
 	struct sockaddr_un it;
+	fd_set fds;
 	s = socket(AF_LOCAL, SOCK_STREAM, 0);
 	strcpy(it.sun_path, DEFSOCK);
 	it.sun_family = AF_LOCAL;
@@ -68,18 +70,33 @@ int main(argc, argv)
 	}
 #endif
 	if(argc == 1) {
-		while(!feof(stdin)) {
-			fputs("phonectl> ", stdout);
-			fgets(buff, 1024, stdin);
-			nl = strchr(buff, '\n');
-			if(nl != NULL) *nl = '\0';
-			if(strcmp(buff, "#quit#") == 0) {
-				close(s);
-				return 0;
+		for(;;) {
+			FD_ZERO(&fds);
+			FD_SET(fileno(stdin), &fds);
+			FD_SET(s, &fds);
+			switch(select(s + 1, &fds, NULL, NULL, NULL)) {
+				case -1:
+					perror("select");
+					exit(-1);
+					break;
+				default:
+					{
+						if(FD_ISSET(fileno(stdin), &fds)) {
+							fgets(buff, 1024, stdin);
+							nl = strchr(buff, '\n');
+							if(nl != NULL) *nl = '\0';
+							if(strcmp(buff, "#quit#") == 0) {
+								close(s);
+								return 0;
+							}
+							send(s, buff, strlen(buff) + 1, 0x0);
+						}
+						if(FD_ISSET(s, &fds)) {
+							recv(s, buff, sizeof(buff), 0x0);
+							fputs(buff, stdout);
+						}
+					}
 			}
-			send(s, buff, strlen(buff) + 1, 0x0);
-			recv(s, buff, sizeof(buff), 0x0);
-			fputs(buff, stdout);
 		}
 	}
 	write(s, argv[1], strlen(argv[1]) + 1);

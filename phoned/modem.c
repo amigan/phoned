@@ -172,7 +172,9 @@ int close_modem(char* dev)
 		lprintf(error, "dev %s must begin with /dev/\n", dev);
 		return -5;
 	}
-	uu_unlock((dev+(sizeof("/dev/")-1))); 
+	if(uu_unlock((dev+(sizeof("/dev/")-1))) == -1) {
+		lprintf(error, "uu_unlock: %s", strerror(errno)); 
+	}
 	fclose(modem);
 	pthread_mutex_unlock(&modemmx);
 	return 1;
@@ -209,13 +211,13 @@ int init_modem(char* dev)
 		pthread_mutex_unlock(&modemmx);
 		return -3;
 	}
-	pthread_mutex_unlock(&modemmx);
 	mo = &rockwell;
 	mo->init();
+	voice_init();
+	pthread_mutex_unlock(&modemmx);
 	pthread_mutex_lock(&mpipemx);
 	pipe(modempipes);
 	pthread_mutex_unlock(&mpipemx);
-	voice_init();
 	return 1;
 }
 

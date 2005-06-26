@@ -27,14 +27,14 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/modems/rockwell.c,v 1.6 2005/06/23 16:46:10 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/modems/rockwell.c,v 1.7 2005/06/26 03:27:35 dcp1990 Exp $ */
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <limits.h>
 #include <pthread.h>
 #include <phoned.h>
-#define ROCKWELL_INITSTRING	"ATZ\r\nAT E0 #CID=2 V0"
+#define ROCKWELL_INITSTRING	"ATZ\r\nAT E0 #CID=2 V0\r\n"
 #define ROCKWELL_PICKUP		"ATH1"
 #define ROCKWELL_HANGUP		"ATH"
 #define ROCKWELL_RESET		"ATZ"
@@ -47,6 +47,7 @@ short plug_init(void)
 int rw_init(void)
 {
 	stmod(ROCKWELL_INITSTRING);
+	stmod("AT#CID=2");
 	return 1;
 }
 int rw_destroy(void)
@@ -134,6 +135,8 @@ void rw_sdev(d)
 /* voice */
 void rw_voice_init(void)
 {
+	stmod("ATE0");
+	stmod("ATV0");
 	stmod("AT#VSP=55");
 	stmod("AT#VSD=0");
 	stmod("AT#VBS=4");
@@ -142,6 +145,7 @@ void rw_voice_init(void)
 	stmod("ATS30=60");
 	stmod("AT#CLS=8");
 	rw_sdev(dialup);
+	stmod("AT#CID=2");
 }
 void rw_set_rings(rings)
 	int rings;

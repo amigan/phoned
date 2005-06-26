@@ -28,7 +28,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/remote.c,v 1.14 2005/06/26 02:56:37 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/remote.c,v 1.15 2005/06/26 03:27:31 dcp1990 Exp $ */
 /* system includes */
 #include <string.h>
 #include <stdio.h>
@@ -255,7 +255,7 @@ int dialogue_cb(fd, sck)
 					if(FD_ISSET(s, &fds) != 0) {
 						rc = recv(s, buffer, 1, 0x0);
 						if(rc == 0) {
-							lprintf(debug, "Socket closed! Got zero!\n");
+							lprintf(debug, "cb: Socket closed! Got zero!\n");
 							return 0;
 						} else if(rc == -1) {
 							lprintf(debug, "recv(): %s", strerror(errno));

@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/xfone/sockstuff.c,v 1.1 2005/06/26 04:47:20 dcp1990 Exp $ */
+/* $Amigan: phoned/xfone/sockstuff.c,v 1.2 2005/06/26 15:51:22 dcp1990 Exp $ */
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -46,39 +46,31 @@
 #include <tcl.h>
 
 #define CMD_ARGS (ClientData clientData, Tcl_Interp *interp, int argc, Tcl_Obj *CONST objv[])
+typedef struct cdta {
+	int fd;
+	Tcl_Channel channel;
+} Udom_Cdata_t;
 
-int UdomConnectSocket (cdata, interp, argc, argv)
+
+int Udom_Close(cdata, interp)
 	ClientData cdata;
 	Tcl_Interp *interp;
-	int argc;
-	char **argv;
 {
-	int s;
-	struct sockaddr_un them;
-	if(argc < 2) {
-		return TCL_ERROR;
-	}
-	s = socket(AF_LOCAL, SOCK_STREAM, 0);
-	strcpy(them.sun_path, sockfile);
-	them.sun_family = AF_LOCAL;
-	if(connect(s, (struct sockaddr *)&them, 1 + strlen(them.sun_path) + sizeof(them.sun_family)) == -1) {
-		return TCL_ERROR;
-	}
+	int rc;
+	Udom_Cdata_t *idata = (Udom_Cdata_t*)cdata;
+	rc = close(idata->fd);
+	ckfree((char*)idata);
+	return rc == 0 ? rc : errno;
 }
-int UdomClose(idata, interp)
-	ClientData idata;
-	Tcl_Interp *interp;
-{
-	close(socket);
-}
-int UdomInput(idata, buf, sizebuf, errorptr)
-	ClientData idata;
+int Udom_Input(cdata, buf, sizebuf, errorptr)
+	ClientData cdata;
 	char *buf;
 	int sizebuf;
 	int *errorptr;
 {
 	int ec;
-	ec = read((int)idata, buf, sizebuf);
+	Udom_Cdata_t *idata = (Udom_Cdata_t*)cdata;
+	ec = read(idata->fd, buf, sizebuf);
 	if(ec == -1) {
 		*errorptr = errno;
 		return -1;
@@ -87,14 +79,15 @@ int UdomInput(idata, buf, sizebuf, errorptr)
 	}
 }
 
-int UdomOutput(idata, buf, towrite, ecptr)
-	ClientData idata;
+int Udom_Output(cdata, buf, towrite, ecptr)
+	ClientData cdata;
 	CONST char *buf;
 	int towrite;
 	int *ecptr;
 {
 	int rc;
-	rc = write((int)idata, buf, towrite);
+	Udom_Cdata_t *idata = (Udom_Cdata_t*)cdata;
+	rc = write(idata->fd, buf, towrite);
 	if(rc == -1) {
 		*ecptr = errno;
 		return -1;
@@ -103,21 +96,107 @@ int UdomOutput(idata, buf, towrite, ecptr)
 	}
 }
 
+void Udom_Watch(cdata, mask)
+	ClientData cdata;
+	int mask;
+{
+	Udom_Cdata_t *idata = (Udom_Cdata_t*)cdata;
+	if(mask) {
+		Tcl_CreateFileHandler(idata->fd, mask,
+				(Tcl_FileProc*)Tcl_NotifyChannel,
+				(ClientData)idata->channel);
+	} else {
+		Tcl_DeleteFileHandler(idata->fd);
+	}
+}
+
+int Udom_GetHandle(cdata, dir, handptr)
+	ClientData cdata;
+	int dir;
+	ClientData *handptr;
+{
+	Udom_Cdata_t *idata = (Udom_Cdata_t*)cdata;
+	*handptr = (ClientData)idata->fd;
+	return TCL_OK;
+}
+
 /* write watcher */
-Tcl_ChannelType ourchan = {
+Tcl_ChannelType Udom_ChanType = {
 	"udomain",
 	TCL_CHANNEL_VERSION_3,
-	&UdomClose,
-	&UdomInput,
-	&UdomOutput,
+	&Udom_Close,
+	&Udom_Input,
+	&Udom_Output,
 	NULL, /* seek */
 	NULL, /* set and getoption, might do later */
 	NULL,
-	&UdomWatch,
-	&UdomGetHandle,
+	&Udom_Watch,
+	&Udom_GetHandle,
 	NULL, /* close2proc */
 	NULL, /* block mode */
-	&UdomFlush,
-	&UdomHandler,
-	&UdomWideSeek /* return EINVAL */
+	NULL, /* flush */
+	NULL, /* handler */
+	NULL /* wideseek */
 };
+
+
+
+Tcl_Channel Udom_CreateChannel(sockfile, mask)
+	CONST char *sockfile;
+	int mask;
+{
+	Udom_Cdata_t *cdt;
+	int s;
+	char chname[25];
+	struct sockaddr_un them;
+	cdt = (Udom_Cdata_t*)ckalloc(sizeof(Udom_Cdata_t));
+	s = socket(AF_LOCAL, SOCK_STREAM, 0);
+	strcpy(them.sun_path, sockfile);
+	them.sun_family = AF_LOCAL;
+	if(connect(s, (struct sockaddr *)&them, 1 + strlen(them.sun_path) + sizeof(them.sun_family)) == -1) {
+		ckfree((char*)cdt);
+		return NULL;
+	}
+	cdt->fd = s;
+	snprintf(chname, 24, "udom%d", cdt->fd);
+	cdt->channel = Tcl_CreateChannel(&Udom_ChanType, chname, cdt, mask);
+	return cdt->channel;
+}
+int Udom_MakeSock (cdata, interp, argc, argv)
+	ClientData cdata;
+	Tcl_Interp *interp;
+	int argc;
+	Tcl_Obj *const argv[];
+{
+	char *arg;
+	char *sfl = NULL;
+	int a, optind;
+	Tcl_Channel res;
+	const char *udomopt[] = {
+		"-file", (char*)NULL
+	};
+	enum udomopt {
+		UDOM_FILE
+	};
+	for(a = 1; a < argc; a++) {
+		arg = Tcl_GetString(argv[a]);
+		if(*arg != '-') break;
+		if(Tcl_GetIndexFromObj(interp, argv[a], udomopt, "option", TCL_EXACT, &optind)
+				!= TCL_OK) return TCL_ERROR;
+		switch((enum udomopt)optind) {
+			case UDOM_FILE:
+				if(a >= argc) return qseterr("needs file!");
+				sfl = Tcl_GetString(argv[a]);
+				break;
+			default:
+				Tcl_Panic("udom: bad optind to opts");
+		}
+	}
+	if(sfl == NULL) return qseterr("file argument REQUIRED.");
+	res = Udom_CreateChannel(sfl, TCL_READABLE | TCL_WRITABLE);
+	if(res == NULL) return TCL_ERROR;
+	Tcl_ResetResult(interp);
+	Tcl_AppendResult(interp, Tcl_GetChannelName(res), (char*)NULL);
+	return TCL_OK;
+}
+	

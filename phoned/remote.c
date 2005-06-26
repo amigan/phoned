@@ -28,7 +28,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/remote.c,v 1.15 2005/06/26 03:27:31 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/remote.c,v 1.16 2005/06/26 21:45:20 dcp1990 Exp $ */
 /* system includes */
 #include <string.h>
 #include <stdio.h>
@@ -433,5 +433,4 @@ void begin_dialogue(fp, fd)
 		if(si.l == 0x0) usertop = 0;
 		pthread_mutex_unlock(&usermx);
 	}
-	lprintf(info, "Connection closed in begin_dialogue\n");
 }

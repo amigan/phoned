@@ -27,13 +27,11 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Amigan: phoned/xfone/xfone.tcl,v 1.3 2005/06/27 20:47:09 dcp1990 Exp $
+# $Amigan: phoned/xfone/xfone.tcl,v 1.4 2005/06/27 20:54:07 dcp1990 Exp $
 source paths.tcl
 #modules
 load $udom_lib
 source config.tcl
-
-
 
 source phoned.tcl
 source maindlg.tcl

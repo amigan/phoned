@@ -1,8 +1,8 @@
 # main makefile...
-# $Amigan: phoned/lib/Makefile,v 1.1 2005/06/14 02:44:41 dcp1990 Exp $
+# $Amigan: phoned/lib/Makefile,v 1.2 2005/06/27 00:13:04 dcp1990 Exp $
 # Oh My Fucking God, this is such a big, unportable mess. Oh well.
 # BSD Make > *
-APPS=libpvf
+APPS=libpvf tcl
 APPSUF=${APPS:S/$/_app/}
 APPSCLEAN=${APPS:S/$/_cl/}
 all: ${APPSUF}

@@ -27,7 +27,10 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Amigan: phoned/xfone/maindlg.tcl,v 1.3 2005/06/27 00:08:47 dcp1990 Exp $
+# $Amigan: phoned/xfone/maindlg.tcl,v 1.4 2005/06/27 20:47:09 dcp1990 Exp $
+package require Tk
+# important
+package require tablelist
 # vars
 proc logindlg {} {
 	toplevel .login
@@ -47,6 +50,34 @@ proc logindlg {} {
 	focus .login
 	wm resizable .login 0 0
 	wm title .login "Login"
+}
+proc addtocallslist {dta} {
+	if {![winfo exists .calls]} return
+	set tlb .calls.m.lb
+	set flds [split $dta :]
+	set date [join [list [lindex $flds 0] [lindex $flds 1]] /]
+	set time [join [list [lindex $flds 2] : [lindex $flds 3]]
+	set name [lindex $flds 4]
+	set numb [lindex $flds 5]
+	$tlb insert [list $date $time $name $numb] end
+}
+proc calls {} {
+	global loggedin
+	if {!$loggedin} return
+	toplevel .calls
+	set f .calls.m
+	frame $f
+	grid $f -row 0
+	set g .calls.acts
+	frame $g
+	grid $g -row 1
+	#altre
+	set tlb [set f].lb
+	tablelist::tablelist $tlb -columns {0 "Time" 1 "Date" 2 "Name" 3 "Number"} -stretch all
+	grid $tlb -row 0 -column 0
+	#btns
+	button $g.inf -text "Info"
+	grid $g.inf -row 0 -column 0
 }
 set prj .mbar.project
 set phdm .mbar.phoned
@@ -74,7 +105,7 @@ menu .mbar.help -tearoff no
 
 # main widgets
 set w .m.calls
-button .m.calls -text "Calls"
+button .m.calls -text "Calls" -command calls
 $w configure -font "[font actual [$w cget -font]] -size 20"
 set w .m.msgs
 button .m.msgs -text "Messages"

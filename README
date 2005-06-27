@@ -1,4 +1,4 @@
-$Amigan: phoned/README,v 1.8 2005/06/23 02:48:39 dcp1990 Exp $
+$Amigan: phoned/README,v 1.9 2005/06/27 21:21:03 dcp1990 Exp $
 +=======================================+
 |		phoned			|
 |	(C)2005, Dan Ponte		|
@@ -20,8 +20,10 @@ This is the phoned distribution, version 1.0.
 phoned is distributed under the license outlined in COPYRIGHT. Please read
 it before use!
 
-This is now a hybrid of the older cidserv distribution. I might go to CVS
-some day.
+This is now a hybrid of the older cidserv distribution.
+
+For building, Tcl 8.4 is *required*. You should have it, since it's so good.
+Other stuff needs Tk 8.4 as well.
 
 To build, simply type 'make'. phoned was written for BSD make (just "make"
 on regular BSD systems, "pmake" on many linux machines.) For further
@@ -37,19 +39,30 @@ respect it.
 You will find the following directories in this source archive:
 
 cidclient/ - Win32 caller ID notifier, for VB6 (with NSIS script), like xcid
-cnd/ - Caller ID program
 doc/ - misc. documentation
-examples/ - example scripts
+examples/ - example scripts (nothing yet)
 include/ - global include files
 lib/ - API libraries
-phonectl/ - command line client to phoned
+	libpvf/ - libpvf for converting native modem formats to pvf
+	tcl/ - various Tcl libraries, such as my udom AF_LOCAL channel module
+phonectl/ - command line client to phoned. Very spartan; use at own risk.
 phoned/ - main phone daemon written in C
+	modems/ - modem drivers
 scripts/ - various administration and cool scripts
 xfone/ - Tcl/Tk interface to phoned
 xcid/ - CID notifier for X clients. Not built by default; cd xcid && cat README
 
 The scripts need tcllib. Please modify the paths in the scripts to libraries
 so that they work.
+
+xfone needs tablelist. Please modify configure.tcl and xfone/xfone.tcl to
+point to your wish interpreter.
+
+Links:
+tablelist - http://www.nemethi.de/
+Tcl/Tk - http://www.tcl.tk/
+PCRE - http://www.pcre.org/
+Tcllib - http://tcllib.sourceforge.net/
 
 dcp1990@neptune.atopia.net - http://www.theamigan.net/phoned/index.html
 vim:tw=76

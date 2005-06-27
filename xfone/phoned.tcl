@@ -27,22 +27,40 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Amigan: phoned/xfone/phoned.tcl,v 1.4 2005/06/26 16:51:00 dcp1990 Exp $
+# $Amigan: phoned/xfone/phoned.tcl,v 1.5 2005/06/27 00:08:47 dcp1990 Exp $
 load ./udom.so
 
 proc openSock {sfile} {
 	set os [udom -file $sfile]
-	fconfigure $os -buffering line
+	fconfigure $os -buffering line -blocking false
+	fileevent $os readable [list handleme $os]
 	return $os
 }
-
+proc handleme {fh} {
+	parseres [gets $fh]
+}
 proc parseres {res} {
+# 501 = success, 514 = failure
+#	tk_messageBox -message $res -type ok -title Result
+	if {[regexp -- "^(\[0-9\]{3}) (\[A-Z\]+): (.*)$" $res a code msg english]} {
+		switch $code {
+			501 {
+				tk_messageBox -message "Logged in!" -type ok -title "Login"
+			}
+			514 {
+				set res [tk_messageBox -message "Login failure." -type retrycancel]
+				switch $res { retry {logindlg} cancel {return} }
+			}
+			default {
+				tk_messageBox -message [list Result was $res] -type ok -title "Result"
+			}
+		}
+	}
 }
 
 proc login {user pass} {
 	global sh
-	puts $sh {login $user $pass}
-	parseres [gets $sh]
+	puts $sh [list login $user $pass]
 }
 
-set $sh [openSock $sockfile]
+set sh [openSock $sockfile]

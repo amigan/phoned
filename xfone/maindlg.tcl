@@ -27,28 +27,37 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Amigan: phoned/xfone/maindlg.tcl,v 1.2 2005/06/26 16:51:00 dcp1990 Exp $
+# $Amigan: phoned/xfone/maindlg.tcl,v 1.3 2005/06/27 00:08:47 dcp1990 Exp $
 # vars
 proc logindlg {} {
 	toplevel .login
-	frame .login.m -width 5c -height 2c
-	grid .m -row 0 -column 0
-	label .login.m.lo -text "Login:"
-	entry .login.m.loge
-	grid .login.m.lo .login.m.loge -row 0
-	label .login.m.pa -text "Pass:"
-	entry .login.m.pase -show "*"
-	grid .login.m.pa .login.m.pase -row 1
-	button .login.m.log -text "Login" -command {loginProc [.login.m.loge get] [.login.m.pase get]}
-	button .login.m.cancel -text "Cancel" -command {destroy .login}
-	grid .login.m.log -row 0 -column 0 -sticky ew
-	grid .login.m.cancel -row 0 -column 1 -sticky ew
+	label .login.lo -text "Login:"
+	entry .login.loge
+	grid .login.lo -row 0 -column 0
+	grid .login.loge -row 0 -column 1
+	label .login.pa -text "Pass:"
+	entry .login.pase -show "*"
+	grid .login.pa  -row 1 -column 0
+	grid .login.pase -row 1 -column 1
+	button .login.log -text "Login" -command {login [.login.loge get] [.login.pase get] ; grab release .login; destroy .login}
+	button .login.cancel -text "Cancel" -command {grab release .login; destroy .login}
+	grid .login.log -row 2 -column 0 -sticky ew
+	grid .login.cancel -row 2 -column 1 -sticky ew
+	grab set .login
+	focus .login
+	wm resizable .login 0 0
+	wm title .login "Login"
 }
 set prj .mbar.project
 set phdm .mbar.phoned
 #frame
 frame .m -borderwidth 2 -width 20c -height 10c
-grid .m -sticky wn -row 0 -column 0
+grid .m -sticky nsew -row 0 -column 0
+grid columnconfigure .m 0 -weight 1 -uniform 1
+grid columnconfigure .m 1 -weight 1 -uniform 1
+grid rowconfigure .m 0 -weight 1 -uniform 1
+grid rowconfigure .m 1 -weight 1 -uniform 1
+grid rowconfigure .m 2 -weight 1 -uniform 1
 #menu
 menu .mbar -tearoff no
 menu $prj -tearoff no
@@ -56,8 +65,35 @@ menu $prj -tearoff no
 $prj add command -label "Quit" -command "exit"
 menu $phdm -tearoff no
 .mbar add cascade -label "PhoneD" -menu $phdm -underline 1
-$phdm add command -label "Login"
+$phdm add command -label "Login" -command logindlg
 menu .mbar.help -tearoff no
 .mbar add cascade -label "Help" -menu .mbar.help -underline 1
 .mbar.help add command -label "About Xfone"
 . configure -menu .mbar
+
+
+# main widgets
+set w .m.calls
+button .m.calls -text "Calls"
+$w configure -font "[font actual [$w cget -font]] -size 20"
+set w .m.msgs
+button .m.msgs -text "Messages"
+$w configure -font "[font actual [$w cget -font]] -size 20"
+set w .m.admin
+button .m.admin -text "Administration" 
+$w configure -font "[font actual [$w cget -font]] -size 20"
+set w .m.dialer
+button .m.dialer -text Dialer 
+$w configure -font "[font actual [$w cget -font]] -size 20"
+set w .m.utility
+button .m.utility -text "Utilities" 
+$w configure -font "[font actual [$w cget -font]] -size 20"
+set w .m.logoi
+button .m.logoi -text Login
+$w configure -font "[font actual [$w cget -font]] -size 20"
+grid propagate .m false
+grid .m.calls .m.dialer -row 0 -sticky nesw
+grid .m.msgs .m.utility -row 1 -sticky nesw
+grid .m.admin .m.logoi -row 2 -sticky nesw
+wm resizable . 0 0
+wm title . "Xfone"

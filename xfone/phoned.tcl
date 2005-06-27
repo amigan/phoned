@@ -27,7 +27,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Amigan: phoned/xfone/phoned.tcl,v 1.6 2005/06/27 20:47:09 dcp1990 Exp $
+# $Amigan: phoned/xfone/phoned.tcl,v 1.7 2005/06/27 21:08:04 dcp1990 Exp $
 set loggedin false
 set callscb addtocallslist
 proc openSock {sfile} {
@@ -56,6 +56,7 @@ proc parseres {res} {
 			}
 			700 {
 				$callscb $data
+			}
 			default {
 				tk_messageBox -message [list Result was $res] -type ok -title "Result"
 			}

@@ -1,4 +1,4 @@
-$Amigan: phoned/TODO,v 1.4 2005/06/26 03:29:20 dcp1990 Exp $
+$Amigan: phoned/TODO,v 1.5 2005/06/27 21:27:17 dcp1990 Exp $
 TODO
 For phoned:
 *Handle conditions (write the glue) - Halfway done.
@@ -8,11 +8,14 @@ For phoned:
 *Write answering subsystem
 *Add DB management functions as remote commands
 *Fix all possible memory leaks (isn't this always a TODO?)
+*Add support for actual INET sockets (shouldn't be too hard)
 For phonectl:
 *Clean up interface
 *Add ncurses mode
 For xfone:
-*Begin it
+*Improve it, specifically:
+*Clean up event stuff. I.E. add a command that waits for and returns what the server gives us.
+*INET sockets. See above.
 For scripts:
 *Clean up usermaint.tcl, add more stuff
 

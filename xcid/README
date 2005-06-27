@@ -3,3 +3,4 @@ To build without XOSD, type
 instead of just
 	make.
 Pretty simple to use; you just start it. Stuff can be tweaked in the source to your liking.
+Note that the Telemarketer button in the Xt version doesn't work with phoned. It is there for users of cidserv.

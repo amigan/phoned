@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phonectl/phonectl.c,v 1.7 2005/06/26 02:56:36 dcp1990 Exp $ */
+/* $Amigan: phoned/phonectl/phonectl.c,v 1.8 2005/06/28 02:01:28 dcp1990 Exp $ */
 /* system includes */
 #include <stdio.h>
 #include <stdlib.h>
@@ -92,7 +92,10 @@ int main(argc, argv)
 							send(s, buff, strlen(buff) + 1, 0x0);
 						}
 						if(FD_ISSET(s, &fds)) {
-							recv(s, buff, sizeof(buff), 0x0);
+							if(recv(s, buff, sizeof(buff), 0x0) == 0) {
+								close(s);
+								return 0;
+							}
 							fputs(buff, stdout);
 						}
 					}

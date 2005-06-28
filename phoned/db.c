@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/db.c,v 1.7 2005/06/20 01:45:08 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/db.c,v 1.8 2005/06/28 02:02:21 dcp1990 Exp $ */
 #include <stdio.h>
 #include <string.h>
 #include <pthread.h>
@@ -162,7 +162,6 @@ short db_check_crend(loginna, pass)
 	md5_finish(&state, digest);
 	for(di = 0; di < 16; ++di)
 		sprintf(pmd5 + di * 2, "%02x", digest[di]);
-	lprintf(debug, "Digest came out to %s\n", pmd5);
 	sql = sqlite3_mprintf("SELECT login,passmd5 FROM " USERS_TABLE " WHERE login=='%q' AND passmd5=='%q'", loginna, pmd5);
 	pthread_mutex_lock(&dbmx);
 	rc = sqlite3_prepare(db, sql, strlen(sql), &cst, &tail);

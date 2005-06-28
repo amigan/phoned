@@ -3,7 +3,7 @@
  * (C)2005, Dan Ponte
  * BSDL w/ advert.
  */
-/* $Amigan: phoned/include/phoned.h,v 1.28 2005/06/25 02:43:54 dcp1990 Exp $ */
+/* $Amigan: phoned/include/phoned.h,v 1.29 2005/06/28 02:32:52 dcp1990 Exp $ */
 #include <pcre.h> /* fugly, I know... */
 #define VERSION "0.1"
 #define LOGFILE "-"
@@ -205,6 +205,7 @@ cid_t *decode_sdmf(unsigned char *s);
 cid_t *decode_mdmf(unsigned char *s);
 void voice_init(void);
 int dialogue_with_modem(int (*cback)(int, void*), void *arg);
+short db_dump_calls(int fd, const char *fmt);
 /* old stuff...
 void modem_pickup(void);
 void modem_hangup(void);

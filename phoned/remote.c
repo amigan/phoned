@@ -28,7 +28,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/remote.c,v 1.18 2005/06/28 02:00:06 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/remote.c,v 1.19 2005/06/28 02:32:54 dcp1990 Exp $ */
 /* system includes */
 #include <string.h>
 #include <stdio.h>
@@ -369,6 +369,9 @@ char *parse_command(cmd, cont, s)
 				RNF("500 OK: Parser tested.\n");
 			} else if(CHK("bye")) {
 				return NULL;
+			} else if(CHK("dumpcalls")) {
+				db_dump_calls(s->fd, "700 CALLREC: %s\n");
+				RNF("516 DONE: Calls Done.\n");
 			} else if(CHK("tmop")) {
 				if(argvect[1] != NULL) {
 					cid_t *rc;

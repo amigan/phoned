@@ -27,8 +27,11 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/db.c,v 1.8 2005/06/28 02:02:21 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/db.c,v 1.9 2005/06/28 02:32:54 dcp1990 Exp $ */
 #include <stdio.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/uio.h>
 #include <string.h>
 #include <pthread.h>
 #include <time.h>
@@ -144,6 +147,40 @@ short db_destroy(void)
 
 /* stuff that does stuff */
 
+short db_dump_calls(fd, fmt)
+	int fd;
+	const char *fmt;
+{
+	int rc;
+	const char *sql = "SELECT * FROM " CALLS_TABLE;
+	const char *tail;
+	char buffer[128];
+	char finalbuf[256];
+	int recs = 0;
+	sqlite3_stmt *cst;
+	pthread_mutex_lock(&dbmx);
+	if((rc = sqlite3_prepare(db, sql, strlen(sql), &cst, &tail)) != SQLITE_OK) {
+		lprintf(error, "dump_calls(%d, %s): prepare: %s", fd, fmt, sqlite3_errmsg(db));
+		pthread_mutex_unlock(&dbmx);
+		return 0;
+	}
+	/* CREATE TABLE " CALLS_TABLE " (id INTEGER PRIMARY KEY, dtime INTEGER, number TEXT, name TEXT, cidmon INTEGER, cidday INTEGER, cidhour INTEGER, cidmin INTEGER) */
+	while((rc = sqlite3_step(cst)) == SQLITE_ROW) {
+		snprintf(buffer, sizeof(buffer), "%d:%d:%d:%d:%s:%s:%d", sqlite3_column_int(cst, 4), sqlite3_column_int(cst, 5), sqlite3_column_int(cst, 6), sqlite3_column_int(cst, 7),
+				sqlite3_column_text(cst, 3), sqlite3_column_text(cst, 2), sqlite3_column_int(cst, 1));
+		snprintf(finalbuf, 256, fmt, buffer);
+		write(fd, finalbuf, strlen(finalbuf));
+		recs++;
+	}
+	if(rc != SQLITE_OK && rc != SQLITE_DONE) {
+		lprintf(error, "dump_calls(%d, %s): error after loop: %s (rc == %d)\n", fd, fmt, sqlite3_errmsg(db), rc);
+		pthread_mutex_unlock(&dbmx);
+		return 0;
+	}
+	sqlite3_finalize(cst);
+	pthread_mutex_unlock(&dbmx);
+	return recs;
+}
 short db_check_crend(loginna, pass)
 	char *loginna;
 	char *pass; /* not md5'd yet */

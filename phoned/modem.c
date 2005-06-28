@@ -56,10 +56,15 @@ short doing_cid = 0;
 extern struct conf cf;
 pthread_t modemth;
 pthread_mutex_t modemmx = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t miomx = PTHREAD_MUTEX_INITIALIZER; /* is modem_io() running? */
+/* pthread_mutex_t modemiomx = PTHREAD_MUTEX_INITIALIZER; *//* is modem_io() running? */
 pthread_mutex_t mpipemx = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t buffermx = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t mpcond = PTHREAD_COND_INITIALIZER;
+pthread_t chie;
+short miorunning = 0;
+extern pthread_t networkth, modemth;
+#define mylock(s)	 lprintf(debug, "%s (0x%x) owns it", pthread_equal(chie, networkth) ? "network" : (pthread_equal(chie,  modemth) ? "modem" : "other/main"), chie); \
+		pthread_mutex_lock(s); chie = pthread_self(); lprintf(debug, "mutex acq");
 int modempipes[2];
 extern pthread_mutex_t cfmx;
 modem_t* mo;
@@ -67,7 +72,7 @@ extern modem_t rockwell;
 void stmod(str)
 	const char* str;
 {
-	if(pthread_mutex_trylock(&modemmx) != 0 && pthread_mutex_trylock(&miomx) != 0) {
+	if(pthread_mutex_trylock(&modemmx) != 0 && miorunning) {
 		pthread_mutex_lock(&mpipemx);
 		write(modempipes[1], "G", 1);
 		pthread_mutex_unlock(&mpipemx);
@@ -88,7 +93,7 @@ int dialogue_with_modem(cback, arg)
 	void *arg;
 {
 	int rc;
-	if(pthread_mutex_trylock(&modemmx) != 0 && pthread_mutex_trylock(&miomx) != 0) {
+	if(pthread_mutex_trylock(&modemmx) != 0 && miorunning) {
 		pthread_mutex_lock(&mpipemx);
 		write(modempipes[1], "G", 1);
 		pthread_mutex_unlock(&mpipemx);
@@ -109,7 +114,7 @@ char *sendwr(str, bufferback, howmuch)
 	size_t howmuch;
 {
 	struct pollfd	fds[1];
-	if(pthread_mutex_trylock(&modemmx) != 0 && pthread_mutex_trylock(&miomx) != 0) {
+	if(pthread_mutex_trylock(&modemmx) != 0 && miorunning) {
 		pthread_mutex_lock(&mpipemx);
 		write(modempipes[1], "G", 1);
 		pthread_mutex_unlock(&mpipemx);
@@ -118,6 +123,7 @@ char *sendwr(str, bufferback, howmuch)
 		write(modemfd, "\r\n", 3);
 		fds[0].fd = modemfd;
 		fds[0].events = POLLRDNORM;
+		fcntl(modemfd, F_SETFL, O_NONBLOCK);
 		switch(poll(fds, 1, 3000)) {
 			case 0:
 				pthread_cond_signal(&mpcond);
@@ -130,7 +136,8 @@ char *sendwr(str, bufferback, howmuch)
 				pthread_mutex_unlock(&modemmx);
 				return bufferback;
 			default:
-				fgets(bufferback, howmuch, modem);
+				/* fgets(bufferback, howmuch, modem); */
+				read(modemfd, bufferback, howmuch);
 				break;
 		}
 		pthread_cond_signal(&mpcond);
@@ -146,7 +153,7 @@ char *sendwr(str, bufferback, howmuch)
 }
 void modem_wake(void)
 {
-	if(pthread_mutex_trylock(&miomx) != 0) {
+	if(miorunning) {
 		pthread_mutex_lock(&mpipemx);
 		write(modempipes[1], "D", 1);
 		pthread_mutex_unlock(&mpipemx);
@@ -211,6 +218,7 @@ int init_modem(char* dev)
 		pthread_mutex_unlock(&modemmx);
 		return -3;
 	}
+	fcntl(modemfd, F_SETFL, O_NONBLOCK);
 	mo = &rockwell;
 	mo->init();
 	voice_init();
@@ -267,17 +275,18 @@ void *modem_io(k)
 	*cbuf = '\0'; cbuf[1] = '\0';
 	fillset();
 	pthread_mutex_lock(&modemmx);
-	pthread_mutex_lock(&miomx);
+	miorunning = 0x1;
 	for(;;) {
 		FD_ZERO(&fds);
 		FD_SET(modemfd, &fds);
 		FD_SET(modempipes[0], &fds);
 	/*	tv.tv_sec = 2;  tunable */
 	/*	tv.tv_usec = 0; */
-		switch(select(modempipes[0] + 1, &fds, NULL, NULL, /* dotm ? &tv :*/ NULL)) {
+		switch(select((modempipes[0] > modemfd ? modempipes[0] : modemfd) + 1, &fds, NULL, NULL, /* dotm ? &tv :*/ NULL)) {
 			case -1:
 				lprintf(error, "select on modem: %s", strerror(errno));
 				pthread_mutex_unlock(&modemmx);
+				miorunning = 0;
 				pthread_exit(NULL);
 				break;
 			case 0:
@@ -296,8 +305,10 @@ void *modem_io(k)
 					}
 					if(FD_ISSET(modempipes[0], &fds) != 0) {
 						read(modempipes[0], cbuf, 1);
-						if(*cbuf == 'G') pthread_cond_wait(&mpcond, &modemmx); else {
-							pthread_mutex_unlock(&miomx);
+						if(*cbuf == 'G') {
+							pthread_cond_wait(&mpcond, &modemmx);
+						} else {
+							miorunning = 0;
 							pthread_mutex_unlock(&modemmx);
 							pthread_mutex_lock(&cfmx);
 							close_modem(cf.modemdev);
@@ -311,7 +322,7 @@ void *modem_io(k)
 		if(*cbuf == 'D') break;
 	}
 	/* NOTREACHED */
-	pthread_mutex_unlock(&miomx);
+	miorunning = 0;
 	pthread_mutex_unlock(&modemmx);
 	pthread_exit(NULL);
 	return 0;

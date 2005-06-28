@@ -28,7 +28,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/remote.c,v 1.16 2005/06/26 21:45:20 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/remote.c,v 1.17 2005/06/28 00:52:17 dcp1990 Exp $ */
 /* system includes */
 #include <string.h>
 #include <stdio.h>
@@ -221,6 +221,7 @@ int dialogue_cb(fd, sck)
 	int rc;
 	s = fileno(so);
 	memset(buffer, 0, sizeof(buffer));
+	lprintf(debug, "dialogue_cb: Started");
 	for(;;) {
 		FD_ZERO(&fds);
 		FD_ZERO(&ex);
@@ -350,7 +351,7 @@ char *parse_command(cmd, cont, s)
 				RNF("500 OK: Handler tested.\n");
 			} else if(CHK("mdlg")) {
 				int rc;
-				write(s->fd, "500 OK: Entering dialogue...\n", sizeof("500 OK: Entering dialogue...\n"));
+				write(s->fd, "500 OK: Entering dialogue...warning: this may crash!\n", sizeof("500 OK: Entering dialogue...warning: this may crash!\n"));
 				rc = dialogue_with_modem(&dialogue_cb, (void*)s->fpo);
 				if(!rc) {
 					return NULL;
@@ -407,7 +408,9 @@ void begin_dialogue(fp, fd)
 	memset(&si, 0, sizeof(state_info_t));
 	si.fpo = fp; /* this is JUST for data, not real commands */
 	si.fd = fd;
+	memset(buffer, 0, sizeof(buffer));
 	while(keep_going == 0x1 && !feof(fp)) {
+		memset(buffer, 0, sizeof(buffer));
 		rc = recv(fd, buffer, MAXBUFSIZE - 1, 0x0);
 		if(rc == 0) {
 			lprintf(debug, "Socket closed! Got zero!\n");

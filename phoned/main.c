@@ -67,8 +67,11 @@ int main(argc, argv)
 	cf.loglevels = LL_ALL;
 	pthread_mutex_unlock(&cfmx);
 	initialize();
+	lprintf(debug, "INIT IS 0x%x", PTHREAD_MUTEX_INITIALIZER);
 	pthread_create(&networkth, NULL, network, NULL);
+	lprintf(debug, "Started network with 0x%x.", networkth);
 	pthread_create(&modemth, NULL, modem_io, NULL);
+	lprintf(debug, "Started modemth with 0x%x.", modemth);
 	pthread_create(&mainth, NULL, mainthf, NULL);
 	pthread_exit(NULL);
 	return 0;

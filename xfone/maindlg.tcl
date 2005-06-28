@@ -27,7 +27,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Amigan: phoned/xfone/maindlg.tcl,v 1.4 2005/06/27 20:47:09 dcp1990 Exp $
+# $Amigan: phoned/xfone/maindlg.tcl,v 1.5 2005/06/28 06:07:41 dcp1990 Exp $
 package require Tk
 # important
 package require tablelist
@@ -56,28 +56,29 @@ proc addtocallslist {dta} {
 	set tlb .calls.m.lb
 	set flds [split $dta :]
 	set date [join [list [lindex $flds 0] [lindex $flds 1]] /]
-	set time [join [list [lindex $flds 2] : [lindex $flds 3]]
+	set time [join [list [lindex $flds 2] [lindex $flds 3]] :]
 	set name [lindex $flds 4]
 	set numb [lindex $flds 5]
-	$tlb insert [list $date $time $name $numb] end
+	$tlb insert end [list $date $time $name $numb]
 }
 proc calls {} {
 	global loggedin
 	if {!$loggedin} return
 	toplevel .calls
 	set f .calls.m
-	frame $f
+	frame $f -width 20c
 	grid $f -row 0
 	set g .calls.acts
-	frame $g
+	frame $g -width 20c
 	grid $g -row 1
 	#altre
 	set tlb [set f].lb
-	tablelist::tablelist $tlb -columns {0 "Time" 1 "Date" 2 "Name" 3 "Number"} -stretch all
+	tablelist::tablelist $tlb -columns {0 "Date" 1 "Time" 2 "Name" 3 "Number"} -stretch all -width 60
 	grid $tlb -row 0 -column 0
 	#btns
 	button $g.inf -text "Info"
 	grid $g.inf -row 0 -column 0
+	wantcalls
 }
 set prj .mbar.project
 set phdm .mbar.phoned

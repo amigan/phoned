@@ -27,7 +27,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $Amigan: phoned/xfone/phoned.tcl,v 1.7 2005/06/27 21:08:04 dcp1990 Exp $
+# $Amigan: phoned/xfone/phoned.tcl,v 1.8 2005/06/28 06:07:41 dcp1990 Exp $
 set loggedin false
 set callscb addtocallslist
 proc openSock {sfile} {
@@ -35,6 +35,11 @@ proc openSock {sfile} {
 	fconfigure $os -buffering line -blocking false
 	fileevent $os readable [list handleme $os]
 	return $os
+}
+proc wantcalls {} {
+	global sh
+	puts $sh "DUMPCALLS"
+	flush $sh
 }
 proc handleme {fh} {
 	parseres [gets $fh]

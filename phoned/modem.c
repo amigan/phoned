@@ -123,7 +123,6 @@ char *sendwr(str, bufferback, howmuch)
 		write(modemfd, "\r\n", 3);
 		fds[0].fd = modemfd;
 		fds[0].events = POLLRDNORM;
-		fcntl(modemfd, F_SETFL, O_NONBLOCK);
 		switch(poll(fds, 1, 3000)) {
 			case 0:
 				pthread_cond_signal(&mpcond);
@@ -146,7 +145,24 @@ char *sendwr(str, bufferback, howmuch)
 		pthread_mutex_lock(&modemmx);
 		write(modemfd, str, strlen(str) + 1);
 		write(modemfd, "\r\n", 3);
-		fgets(bufferback, howmuch, modem);
+		fds[0].fd = modemfd;
+		fds[0].events = POLLRDNORM;
+		switch(poll(fds, 1, 3000)) {
+			case 0:
+				pthread_cond_signal(&mpcond);
+				pthread_mutex_unlock(&modemmx);
+				snprintf(bufferback, howmuch, "*MODEM TIMEOUT*");
+				return bufferback;
+			case -1:
+				lprintf(error, "poll in sendwr: %s\n", strerror(errno));
+				pthread_cond_signal(&mpcond);
+				pthread_mutex_unlock(&modemmx);
+				return bufferback;
+			default:
+				/* fgets(bufferback, howmuch, modem); */
+				read(modemfd, bufferback, howmuch);
+				break;
+		}
 		pthread_mutex_unlock(&modemmx);
 	}
 	return bufferback;

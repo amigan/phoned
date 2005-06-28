@@ -28,7 +28,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/remote.c,v 1.17 2005/06/28 00:52:17 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/remote.c,v 1.18 2005/06/28 02:00:06 dcp1990 Exp $ */
 /* system includes */
 #include <string.h>
 #include <stdio.h>
@@ -42,6 +42,7 @@
 #include <sys/ioctl.h>
 #include <ctype.h>
 #include <sys/uio.h>
+#include <fcntl.h>
 #include <errno.h>
 /* us */
 #include <phoned.h>
@@ -366,6 +367,8 @@ char *parse_command(cmd, cont, s)
 				free(rc);
 				*cont = 0;
 				RNF("500 OK: Parser tested.\n");
+			} else if(CHK("bye")) {
+				return NULL;
 			} else if(CHK("tmop")) {
 				if(argvect[1] != NULL) {
 					cid_t *rc;
@@ -418,7 +421,7 @@ void begin_dialogue(fp, fd)
 		} else if(rc == -1) {
 			lprintf(error, "Error with recv: %s\n", strerror(errno));
 			break;
-		}
+		} else if(rc < 3) continue;
 		if((c = strrchr(buffer, '\n')) != NULL)
 			*c = '\0';
 		rcode = parse_command(buffer, &keep_going, &si);
@@ -428,7 +431,7 @@ void begin_dialogue(fp, fd)
 				break;
 			}
 			if(si.freeit) free(rcode);
-		}
+		} else break;
 	}
 	if(si.l != NULL) {
 		pthread_mutex_lock(&usermx);

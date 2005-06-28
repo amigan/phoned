@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/cid.c,v 1.8 2005/06/22 04:01:03 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/cid.c,v 1.9 2005/06/28 19:28:27 dcp1990 Exp $ */
 /* system includes */
 #include <stdlib.h>
 #include <limits.h>
@@ -105,7 +105,6 @@ cid_t *decode_mdmf(s)
 	p++;
 	ld = *p++;
 	i = strlen(p);
-	lprintf(info, "p == 0x%x", *p);
 	for(; p <= s + i; /* look below */) {
 		switch(*p++) { /* data type */
 			case 0x01: /* date and time */

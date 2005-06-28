@@ -237,7 +237,7 @@ int init_modem(char* dev)
 	fcntl(modemfd, F_SETFL, O_NONBLOCK);
 	mo = &rockwell;
 	mo->init();
-	voice_init();
+	/* voice_init(); */
 	pthread_mutex_unlock(&modemmx);
 	pthread_mutex_lock(&mpipemx);
 	pipe(modempipes);

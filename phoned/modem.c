@@ -122,7 +122,7 @@ char *sendwr(str, bufferback, howmuch)
 		write(modemfd, str, strlen(str) + 1);
 		write(modemfd, "\r\n", 3);
 		fds[0].fd = modemfd;
-		fds[0].events = POLLRDNORM;
+		fds[0].events = POLLRDNORM | POLLIN;
 		switch(poll(fds, 1, 3000)) {
 			case 0:
 				pthread_cond_signal(&mpcond);

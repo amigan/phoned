@@ -27,7 +27,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/modems/rockwell.c,v 1.9 2005/06/28 02:00:08 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/modems/rockwell.c,v 1.10 2005/06/29 22:02:27 dcp1990 Exp $ */
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -48,6 +48,8 @@ int rw_init(void)
 {
 	stmod(ROCKWELL_INITSTRING);
 	stmod("AT#CID=2");
+	stmod("ATE0");
+	stmod("ATV0");
 	return 1;
 }
 int rw_destroy(void)

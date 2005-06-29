@@ -27,10 +27,11 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phonectl/phonectl.c,v 1.8 2005/06/28 02:01:28 dcp1990 Exp $ */
+/* $Amigan: phoned/phonectl/phonectl.c,v 1.9 2005/06/29 22:02:23 dcp1990 Exp $ */
 /* system includes */
 #include <stdio.h>
 #include <stdlib.h>
+#include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
 #include <netdb.h>
@@ -69,6 +70,7 @@ int main(argc, argv)
 		exit(-1);
 	}
 #endif
+	fcntl(fileno(stdin), F_SETFL, O_NONBLOCK);
 	if(argc == 1) {
 		for(;;) {
 			FD_ZERO(&fds);
@@ -82,7 +84,7 @@ int main(argc, argv)
 				default:
 					{
 						if(FD_ISSET(fileno(stdin), &fds)) {
-							fgets(buff, 1024, stdin);
+							read(fileno(stdin), buff, 1024);
 							nl = strchr(buff, '\n');
 							if(nl != NULL) *nl = '\0';
 							if(strcmp(buff, "#quit#") == 0) {

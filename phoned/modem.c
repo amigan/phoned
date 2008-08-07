@@ -206,6 +206,7 @@ int init_modem(char* dev)
 {
 	int lres = 0;
 	pthread_mutex_lock(&modemmx);
+#ifndef MODDEBUG
 	if(strlen(dev) < 7) {
 		lprintf(error , "dev %s too short\n", dev);
 		pthread_mutex_unlock(&modemmx);
@@ -222,6 +223,7 @@ int init_modem(char* dev)
 		pthread_mutex_unlock(&modemmx);
 		return -1;
 	}
+#endif
 	modemfd = open(dev, O_RDWR);
 	if(modemfd == -1) {
 		lprintf(error, "Error opening modem %s: %s\n", dev, strerror(errno));

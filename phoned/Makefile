@@ -1,9 +1,9 @@
 # cnd Makefile
 # (C)2005, Dan Ponte
-# $Amigan: phoned/phoned/Makefile,v 1.14 2005/06/22 22:01:47 dcp1990 Exp $
+# $Amigan: phoned/phoned/Makefile,v 1.15 2008/08/07 19:17:23 dcp1990 Exp $
 include ../global.mk
 # basic stuff. we append for a reason.
-CPPFLAGS+=-I../include -DDEBUG -DYY_NO_UNPUT
+CPPFLAGS+=-I../include -DDEBUG -DYY_NO_UNPUT -DMODDEBUG
 CFLAGS+=-g -Wall -W -ansi ${CPPFLAGS} -pthread
 LDFLAGS+=-lutil -lpcre -lsqlite3
 # keep these up to date.

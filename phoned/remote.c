@@ -28,7 +28,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/* $Amigan: phoned/phoned/remote.c,v 1.19 2005/06/28 02:32:54 dcp1990 Exp $ */
+/* $Amigan: phoned/phoned/remote.c,v 1.20 2008/08/07 19:17:23 dcp1990 Exp $ */
 /* system includes */
 #include <string.h>
 #include <stdio.h>
@@ -364,6 +364,9 @@ char *parse_command(cmd, cont, s)
 				rc = parse_cid("802701083132323130383234070F5354414E444953482048454154494E020A343031333937333337325C\n");
 				cid_log(rc);
 				cid_notify(rc);
+				/* XXX: memory leak!! free the members of the cid_t! make sure other code
+				 * which uses dynamically-allocated cid_t's does so as well.
+				 */
 				free(rc);
 				*cont = 0;
 				RNF("500 OK: Parser tested.\n");

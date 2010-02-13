@@ -76,11 +76,13 @@ void initialize(void)
 		exit(-1);
 	} else whatdone |= WD_CONFIG; /* XXX: if you put anything before this, edit config.y's bitmask on shutd() */
 	pthread_mutex_lock(&cfmx);
-	if(init_modem(cf.modemdev) != 1) {
-		lprintf(fatal, "fatal error: modem didn't initialise properly; see previous messages\n");
-		shutd(whatdone);
-		exit(-1);
-	} else whatdone |= WD_MODEM;
+	if(cf.modemhand) {
+		if(init_modem(cf.modemdev) != 1) {
+			lprintf(fatal, "fatal error: modem didn't initialise properly; see previous messages\n");
+			shutd(whatdone);
+			exit(-1);
+		} else whatdone |= WD_MODEM;
+	}
 	if(!db_init(cf.dbfile)) {
 		lprintf(fatal, "fatal error: database did not open, see previous messages\n");
 		shutd(whatdone);

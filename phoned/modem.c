@@ -69,6 +69,7 @@ int modempipes[2];
 extern pthread_mutex_t cfmx;
 modem_t* mo;
 extern modem_t rockwell;
+extern modem_t agere;
 void stmod(str)
 	const char* str;
 {
@@ -237,7 +238,7 @@ int init_modem(char* dev)
 		return -3;
 	}
 	fcntl(modemfd, F_SETFL, O_NONBLOCK);
-	mo = &rockwell;
+	mo = &agere;
 	mo->init();
 	/* voice_init(); */
 	pthread_mutex_unlock(&modemmx);

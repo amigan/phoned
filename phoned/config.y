@@ -33,10 +33,10 @@ int yywrap(void)
 	return 1;
 }
 %}
-%token NOTIFY OBRACE CBRACE SCOLON QUOTE MODDEV MAIN LLEVEL OR
+%token NOTIFY OBRACE CBRACE SCOLON QUOTE MODDEV MAIN LLEVEL OR MODHAND
 %token FILTERS ACTION NAME PHNUM FILTER FLAGS DB SOCK
  /* HANGUP IGNOREIT PLAY RECORD */
-%token <number> LNUML ACTN FLAG
+%token <number> LNUML ACTN FLAG ENA_DIS_STATE
 %token <string> IPADDR PATH REGEX FNAME
 %%
 commands:
@@ -68,6 +68,8 @@ directive:
 	database
 	|
 	socket
+	|
+	modhand
 	;
 notify:
 	NOTIFY iplist
@@ -112,6 +114,15 @@ dbpath:
 	;
 modemdev:
 	MODDEV devpath
+	;
+modhand:
+	MODHAND ENA_DIS_STATE
+	{
+		pthread_mutex_lock(&cfmx);
+		cf.modemhand = $2;
+		pthread_mutex_unlock(&cfmx);
+		lprintf(debug, "Modem handler %s\n", yylval.number ? "enabled" : "disabled");
+	}
 	;
 devpath:
 	QUOTE PATH QUOTE
